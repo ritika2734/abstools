@@ -1,0 +1,68 @@
+aspect ModificationNodes{
+
+	public void ModifyClassModifier.addModificationsNode(ASTNode value,Model m,Map<ASTNode, ASTNode> modifyClassMap){
+		try{
+			ModuleDecl moduleDecl = this.findModule();
+			ClassDecl cls = this.findClass();
+			// Find added Interfaces
+			for (InterfaceTypeUse iface : getAddedInterfaces()) {
+				iface.setApplicationConditionField(deltaApplicationConditionAttribute());
+				iface.updateApplicationConditionFieldOfChild();
+				InterfaceTypeUse iface2 = iface.treeCopyNoTransform();
+				iface2.setFileName(iface.getFileName());
+				cls.addImplementedInterfaceUse(iface2);
+			}
+			// Find all modifiers
+			for (Modifier mod : getModifiers()) {
+				//Check this statement
+				//mod.setApplicationConditionField(deltaApplicationConditionAttribute());
+				System.out.println("Mod is££££ "+mod);
+				mod.findExistingClassModificationList(mod,modifyClassMap,cls);
+			}
+
+		}catch(Exception e){
+			System.out.println("Exception in ModifyClassModifier.addModificationsNode");
+		}
+	}
+	public void ModifyTypeSynModifier.addModificationsNode(ASTNode value,Model m,Map<ASTNode, ASTNode> modifyClassMap){
+		try{
+			this.setApplicationConditionField(deltaApplicationConditionAttribute());
+			this.updateApplicationConditionFieldOfChild();
+			this.setModuleDeltaName(getDelta().getName());
+			ModuleDecl module = findModule();
+			TypeSynDecl type = getTypeSynDecl().treeCopyNoTransform();
+			type.setFileName(getTypeSynDecl().getFileName());
+			type.setModuleDeltaName(getDelta().getName());
+			module.getDecls().addChild(type);
+		}catch(Exception e){
+			System.err.println("Exception in ModifyTypeSynModifier.addModificationsNode");
+		}
+	}
+	public void ModifyDataTypeModifier.addModificationsNode(ASTNode value,Model m,Map<ASTNode, ASTNode> modifyClassMap){
+		try{
+			this.setApplicationConditionField(deltaApplicationConditionAttribute());
+			this.updateApplicationConditionFieldOfChild();
+			this.setModuleDeltaName(getDelta().getName());
+			ModuleDecl module = findModule();
+			DataTypeDecl dtd = this.getDataTypeDecl().treeCopyNoTransform();
+			dtd.setModuleDeltaName(getDelta().getName());
+			dtd.setFileName(getDataTypeDecl().getFileName());
+			module.getDecls().addChild(dtd);
+
+			//Check importants
+			/*for (FunctionDecl fd : new ASTPreProcessor().createSelectorFunctionsForDeltaApplication(dtd)) {
+	            module.getDecls().addChild(fd);
+	        }*/
+		}catch(Exception e){
+			System.out.println("Exception in ModifyDataTypeModifier.addModificationsNode");
+		}
+	}
+
+	public void ASTNode.addModificationsNode(ASTNode value,Model m,Map<ASTNode, ASTNode> modifyClassMap){
+		try{
+			System.out.println("Running for::::"+this);
+		}catch(Exception e){
+			System.out.println("Exception in ASTNode.addModificationsNode");
+		}
+	}
+}

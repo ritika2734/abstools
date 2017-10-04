@@ -1,0 +1,731 @@
+//import org.chocosolver.solver.constraints.Constraint;
+aspect EvaluateNodeConstraints{
+	public void Model.evaluateNodeConstraints(Product product) throws WrongProgramArgumentException{
+		HashSet<String> productFeatureSet= new HashSet<String>();
+		HashSet<String> newParents = new HashSet<String>();
+		ArrayList<String> allFeatures = new ArrayList<String>();
+		if (productName != null) 
+		{		
+			for(Feature f: product.getFeatures()){
+				productFeatureSet.add(f.getName());
+			}
+			collectParents(productFeatureSet, newParents);
+			//For root feature
+			productFeatureSet.addAll(newParents);
+
+			for(String feature:productFeatureSet )
+				allFeatures.add(feature);
+
+			System.out.println("productFeatureSet::"+allFeatures);
+			this.evaluateNodeConstraints(allFeatures);
+			newParents.clear();
+			newParents=null;
+			productFeatureSet.clear();
+			productFeatureSet=null;
+		}
+
+	}
+
+	/*
+	 * 	This function evaluates the node constraints based on th product selection
+	 * 
+	 * @param - productFeatureSet the set of features present in the product
+	 * 
+	 * */
+
+	/*public void ClassDecl.evaluateNodeConstraints(ArrayList<String> productFeatureSet)
+	{
+		try{
+			//System.out.println("Inside evaluateNodeConstraints for"+this);
+			LogOp tree= this.getNodeLogOpConstraint();
+			org.chocosolver.solver.Model chocoModel=this.getChocoModelField();
+			if(chocoModel!=null){
+				if(tree!=null){
+					for(BoolVarImpl var: this.getChocoVariablesList()){
+						if(productFeatureSet.contains(var.getName())){
+							chocoModel.arithm(var,"=",1).post();
+						}else{
+							chocoModel.arithm(var,"=",0).post();
+						}
+					}
+					chocoModel.addClauses(tree);
+
+				}else{
+					chocoModel.trueConstraint();	
+				}
+
+
+				Solver solver= chocoModel.getSolver();
+				if(solver.findAllSolutions().isEmpty()){
+					setBooleanValue(false);
+				}else{
+					setBooleanValue(true);
+				}
+				//solver.reset();
+
+			}else{
+				this.setBooleanValue(true);	
+				System.out.println("chocomodel Null for"+this);
+			}
+			for (int i=0; i<getNumChild(); i++) {
+				getChild(i).evaluateNodeConstraints(productFeatureSet);
+			}
+			productFeatureSet.clear();
+		}catch(Exception e){
+			System.err.println("Second Exception14 izzzzz::"+e.getMessage());
+			System.exit(1);
+		}
+	}
+
+	public void ParamDecl.evaluateNodeConstraints(ArrayList<String> productFeatureSet)
+	{
+		try{
+			//System.out.println("Inside evaluateNodeConstraints for"+this);
+			LogOp tree= this.getNodeLogOpConstraint();
+			org.chocosolver.solver.Model chocoModel=this.getChocoModelField();
+			if(chocoModel!=null){
+				if(tree!=null){
+					for(BoolVarImpl var: this.getChocoVariablesList()){
+						if(productFeatureSet.contains(var.getName())){
+							chocoModel.arithm(var,"=",1).post();
+						}else{
+							chocoModel.arithm(var,"=",0).post();
+						}
+					}
+					chocoModel.addClauses(tree);
+
+				}else{
+					chocoModel.trueConstraint();	
+				}
+
+
+				Solver solver= chocoModel.getSolver();
+				if(solver.findAllSolutions().isEmpty()){
+					setBooleanValue(false);
+				}else{
+					setBooleanValue(true);
+				}
+				//solver.reset();
+
+			}else{
+				this.setBooleanValue(true);	
+				System.out.println("chocomodel Null for"+this);
+			}
+			for (int i=0; i<getNumChild(); i++) {
+				getChild(i).evaluateNodeConstraints(productFeatureSet);
+			}
+			productFeatureSet.clear();
+		}catch(Exception e){
+			System.err.println("Second Exception14 izzzzz::"+e.getMessage());
+			System.exit(1);
+		}
+	}
+
+
+	public void InterfaceDecl.evaluateNodeConstraints(ArrayList<String> productFeatureSet)
+	{
+		try{
+			LogOp tree= this.getNodeLogOpConstraint();
+			org.chocosolver.solver.Model chocoModel=this.getChocoModelField();
+			if(chocoModel!=null){
+				if(tree!=null){
+					for(BoolVarImpl var: this.getChocoVariablesList()){
+						if(productFeatureSet.contains(var.getName())){
+							chocoModel.arithm(var,"=",1).post();
+						}else{
+							chocoModel.arithm(var,"=",0).post();
+						}
+					}
+					chocoModel.addClauses(tree);
+
+				}else{
+					chocoModel.trueConstraint();	
+				}
+
+
+				Solver solver= chocoModel.getSolver();
+				if(solver.findAllSolutions().isEmpty()){
+					setBooleanValue(false);
+				}else{
+					setBooleanValue(true);
+				}
+				//solver.reset();
+
+			}else{
+				this.setBooleanValue(true);	
+				System.out.println("chocomodel Null for"+this);
+			}
+			for (int i=0; i<getNumChild(); i++) {
+				getChild(i).evaluateNodeConstraints(productFeatureSet);
+			}
+			productFeatureSet.clear();
+		}catch(Exception e){
+			System.err.println("Second Exception14 izzzzz::"+e.getMessage());
+			System.exit(1);
+		}
+	}
+
+	public void InterfaceTypeUse.evaluateNodeConstraints(ArrayList<String> productFeatureSet)
+	{
+		try{
+			LogOp tree= this.getNodeLogOpConstraint();
+			org.chocosolver.solver.Model chocoModel=this.getChocoModelField();
+			if(chocoModel!=null){
+				if(tree!=null){
+					for(BoolVarImpl var: this.getChocoVariablesList()){
+						if(productFeatureSet.contains(var.getName())){
+							chocoModel.arithm(var,"=",1).post();
+						}else{
+							chocoModel.arithm(var,"=",0).post();
+						}
+					}
+					chocoModel.addClauses(tree);
+
+				}else{
+					chocoModel.trueConstraint();	
+				}
+
+
+				Solver solver= chocoModel.getSolver();
+				if(solver.findAllSolutions().isEmpty()){
+					setBooleanValue(false);
+				}else{
+					setBooleanValue(true);
+				}
+				//solver.reset();
+
+			}else{
+				this.setBooleanValue(true);	
+				System.out.println("chocomodel Null for"+this);
+			}
+			for (int i=0; i<getNumChild(); i++) {
+				getChild(i).evaluateNodeConstraints(productFeatureSet);
+			}
+			productFeatureSet.clear();
+		}catch(Exception e){
+			System.err.println("Second Exception14 izzzzz::"+e.getMessage());
+			System.exit(1);
+		}
+	}
+
+
+	public void FieldDecl.evaluateNodeConstraints(ArrayList<String> productFeatureSet)
+	{
+		try{
+			LogOp tree= this.getNodeLogOpConstraint();
+			org.chocosolver.solver.Model chocoModel=this.getChocoModelField();
+			if(chocoModel!=null){
+				if(tree!=null){
+					for(BoolVarImpl var: this.getChocoVariablesList()){
+						if(productFeatureSet.contains(var.getName())){
+							chocoModel.arithm(var,"=",1).post();
+						}else{
+							chocoModel.arithm(var,"=",0).post();
+						}
+					}
+					chocoModel.addClauses(tree);
+
+				}else{
+					chocoModel.trueConstraint();	
+				}
+
+
+				Solver solver= chocoModel.getSolver();
+				if(solver.findAllSolutions().isEmpty()){
+					setBooleanValue(false);
+				}else{
+					setBooleanValue(true);
+				}
+				//solver.reset();
+
+			}else{
+				this.setBooleanValue(true);	
+				System.out.println("chocomodel Null for"+this);
+			}
+			for (int i=0; i<getNumChild(); i++) {
+				getChild(i).evaluateNodeConstraints(productFeatureSet);
+			}
+			productFeatureSet.clear();
+		}catch(Exception e){
+			System.err.println("Second Exception14 izzzzz::"+e.getMessage());
+			System.exit(1);
+		}
+	}
+
+	public void MethodSig.evaluateNodeConstraints(ArrayList<String> productFeatureSet)
+	{
+		try{
+			LogOp tree= this.getNodeLogOpConstraint();
+			org.chocosolver.solver.Model chocoModel=this.getChocoModelField();
+			if(chocoModel!=null){
+				if(tree!=null){
+					for(BoolVarImpl var: this.getChocoVariablesList()){
+						if(productFeatureSet.contains(var.getName())){
+							chocoModel.arithm(var,"=",1).post();
+						}else{
+							chocoModel.arithm(var,"=",0).post();
+						}
+					}
+					chocoModel.addClauses(tree);
+
+				}else{
+					chocoModel.trueConstraint();	
+				}
+
+
+				Solver solver= chocoModel.getSolver();
+				if(solver.findAllSolutions().isEmpty()){
+					setBooleanValue(false);
+				}else{
+					setBooleanValue(true);
+				}
+				//solver.reset();
+
+			}else{
+				this.setBooleanValue(true);	
+				System.out.println("chocomodel Null for"+this);
+			}
+			for (int i=0; i<getNumChild(); i++) {
+				getChild(i).evaluateNodeConstraints(productFeatureSet);
+			}
+			productFeatureSet.clear();
+		}catch(Exception e){
+			System.err.println("Second Exception14 izzzzz::"+e.getMessage());
+			System.exit(1);
+		}
+	}
+
+	public void ParametricFunctionDecl.evaluateNodeConstraints(ArrayList<String> productFeatureSet)
+	{
+		try{
+			LogOp tree= this.getNodeLogOpConstraint();
+			org.chocosolver.solver.Model chocoModel=this.getChocoModelField();
+			if(chocoModel!=null){
+				if(tree!=null){
+					for(BoolVarImpl var: this.getChocoVariablesList()){
+						if(productFeatureSet.contains(var.getName())){
+							chocoModel.arithm(var,"=",1).post();
+						}else{
+							chocoModel.arithm(var,"=",0).post();
+						}
+					}
+					chocoModel.addClauses(tree);
+
+				}else{
+					chocoModel.trueConstraint();	
+				}
+
+
+				Solver solver= chocoModel.getSolver();
+				if(solver.findAllSolutions().isEmpty()){
+					setBooleanValue(false);
+				}else{
+					setBooleanValue(true);
+				}
+
+				//solver.reset();
+
+			}else{
+				this.setBooleanValue(true);	
+				System.out.println("chocomodel Null for"+this);
+			}
+			for (int i=0; i<getNumChild(); i++) {
+				getChild(i).evaluateNodeConstraints(productFeatureSet);
+			}
+			productFeatureSet.clear();
+		}catch(Exception e){
+			System.err.println("Second Exception14 izzzzz::"+e.getMessage());
+			System.exit(1);
+		}
+	}
+
+	public void FunctionDecl.evaluateNodeConstraints(ArrayList<String> productFeatureSet)
+	{
+		try{
+			LogOp tree= this.getNodeLogOpConstraint();
+			org.chocosolver.solver.Model chocoModel=this.getChocoModelField();
+			if(chocoModel!=null){
+				if(tree!=null){
+					chocoModel.addClauses(tree);
+					for(BoolVarImpl var: this.getChocoVariablesList()){
+						if(productFeatureSet.contains(var.getName())){
+							chocoModel.arithm(var,"=",1).post();
+						}else{
+							chocoModel.arithm(var,"=",0).post();
+						}
+					}
+
+
+				}else{
+					chocoModel.trueConstraint();	
+				}
+
+
+				Solver solver= chocoModel.getSolver();
+				if(solver.findAllSolutions().isEmpty()){
+					setBooleanValue(false);
+				}else{
+					setBooleanValue(true);
+				}
+				//solver.reset();
+
+			}else{
+				this.setBooleanValue(true);	
+				System.out.println("chocomodel Null for"+this);
+			}
+			for (int i=0; i<getNumChild(); i++) {
+				getChild(i).evaluateNodeConstraints(productFeatureSet);
+			}
+			productFeatureSet.clear();
+		}catch(Exception e){
+			System.err.println("Second Exception14 izzzzz::"+e.getMessage());
+			System.exit(1);
+		}
+	}
+
+	public void DataTypeDecl.evaluateNodeConstraints(ArrayList<String> productFeatureSet)
+	{
+		try{
+			LogOp tree= this.getNodeLogOpConstraint();
+			org.chocosolver.solver.Model chocoModel=this.getChocoModelField();
+			if(chocoModel!=null){
+				if(tree!=null){
+					chocoModel.addClauses(tree);
+					for(BoolVarImpl var: this.getChocoVariablesList()){
+						if(productFeatureSet.contains(var.getName())){
+							chocoModel.arithm(var,"=",1).post();
+						}else{
+							chocoModel.arithm(var,"=",0).post();
+						}
+					}
+
+
+				}else{
+					chocoModel.trueConstraint();	
+				}
+
+
+				Solver solver= chocoModel.getSolver();
+				if(solver.findAllSolutions().isEmpty()){
+					setBooleanValue(false);
+				}else{
+					setBooleanValue(true);
+				}
+				//solver.reset();
+
+			}else{
+				this.setBooleanValue(true);	
+				System.out.println("chocomodel Null for"+this);
+			}
+			for (int i=0; i<getNumChild(); i++) {
+				getChild(i).evaluateNodeConstraints(productFeatureSet);
+			}
+			productFeatureSet.clear();
+		}catch(Exception e){
+			System.err.println("Second Exception14 izzzzz::"+e.getMessage());
+			System.exit(1);
+		}
+	}
+
+	public void ParametricDataTypeDecl.evaluateNodeConstraints(ArrayList<String> productFeatureSet)
+	{
+		try{
+			LogOp tree= this.getNodeLogOpConstraint();
+			org.chocosolver.solver.Model chocoModel=this.getChocoModelField();
+			if(chocoModel!=null){
+				if(tree!=null){
+					chocoModel.addClauses(tree);
+					for(BoolVarImpl var: this.getChocoVariablesList()){
+						if(productFeatureSet.contains(var.getName())){
+							chocoModel.arithm(var,"=",1).post();
+						}else{
+							chocoModel.arithm(var,"=",0).post();
+						}
+					}
+
+
+				}else{
+					chocoModel.trueConstraint();	
+				}
+
+
+				Solver solver= chocoModel.getSolver();
+				if(solver.findAllSolutions().isEmpty()){
+					setBooleanValue(false);
+				}else{
+					setBooleanValue(true);
+				}
+				//solver.reset();
+
+			}else{
+				this.setBooleanValue(true);	
+				System.out.println("chocomodel Null for"+this);
+			}
+			for (int i=0; i<getNumChild(); i++) {
+				getChild(i).evaluateNodeConstraints(productFeatureSet);
+			}
+			productFeatureSet.clear();
+		}catch(Exception e){
+			System.err.println("Second Exception14 izzzzz::"+e.getMessage());
+			System.exit(1);
+		}
+	}
+
+	public void Export.evaluateNodeConstraints(ArrayList<String> productFeatureSet)
+	{
+		try{
+			LogOp tree= this.getNodeLogOpConstraint();
+			org.chocosolver.solver.Model chocoModel=this.getChocoModelField();
+			if(chocoModel!=null){
+				if(tree!=null){
+					chocoModel.addClauses(tree);
+					for(BoolVarImpl var: this.getChocoVariablesList()){
+						if(productFeatureSet.contains(var.getName())){
+							chocoModel.arithm(var,"=",1).post();
+						}else{
+							chocoModel.arithm(var,"=",0).post();
+						}
+					}
+
+
+				}else{
+					chocoModel.trueConstraint();	
+				}
+
+
+				Solver solver= chocoModel.getSolver();
+				if(solver.findAllSolutions().isEmpty()){
+					setBooleanValue(false);
+				}else{
+					setBooleanValue(true);
+				}
+				//solver.reset();
+
+			}else{
+				this.setBooleanValue(true);	
+				System.out.println("chocomodel Null for"+this);
+			}
+			for (int i=0; i<getNumChild(); i++) {
+				getChild(i).evaluateNodeConstraints(productFeatureSet);
+			}
+			productFeatureSet.clear();
+		}catch(Exception e){
+			System.err.println("Second Exception14 izzzzz::"+e.getMessage());
+			System.exit(1);
+		}
+	}
+
+	public void Import.evaluateNodeConstraints(ArrayList<String> productFeatureSet)
+	{
+		try{
+			LogOp tree= this.getNodeLogOpConstraint();
+			org.chocosolver.solver.Model chocoModel=this.getChocoModelField();
+			if(chocoModel!=null){
+				if(tree!=null){
+					chocoModel.addClauses(tree);
+					for(BoolVarImpl var: this.getChocoVariablesList()){
+						if(productFeatureSet.contains(var.getName())){
+							chocoModel.arithm(var,"=",1).post();
+						}else{
+							chocoModel.arithm(var,"=",0).post();
+						}
+					}
+
+
+				}else{
+					chocoModel.trueConstraint();	
+				}
+
+
+				Solver solver= chocoModel.getSolver();
+				if(solver.findAllSolutions().isEmpty()){
+					setBooleanValue(false);
+				}else{
+					setBooleanValue(true);
+				}
+				//solver.reset();
+
+			}else{
+				this.setBooleanValue(true);	
+				System.out.println("chocomodel Null for"+this);
+			}
+			for (int i=0; i<getNumChild(); i++) {
+				getChild(i).evaluateNodeConstraints(productFeatureSet);
+			}
+			productFeatureSet.clear();
+		}catch(Exception e){
+			System.err.println("Second Exception14 izzzzz::"+e.getMessage());
+			System.exit(1);
+		}
+	}
+
+
+	public void MethodImpl.evaluateNodeConstraints(ArrayList<String> productFeatureSet)
+	{
+		try{
+			if((getMethodSig().getName()).equals("sayHello")){
+				if(getParent().getParent() instanceof ClassDecl){
+					System.out.println("getNodeLogOpConstraint() evaluateNodeConstraints::"+getNodeLogOpConstraint());
+				}
+			}
+
+			LogOp tree= this.getNodeLogOpConstraint();
+			org.chocosolver.solver.Model chocoModel=getChocoModelField();
+			if(chocoModel!=null){
+				if(tree!=null){
+					chocoModel.addClauses(tree);
+					for(BoolVarImpl var: getChocoVariablesList()){
+						if(productFeatureSet.contains(var.getName())){
+							chocoModel.arithm(var,"=",1).post();
+						}else{
+							chocoModel.arithm(var,"=",0).post();
+						}
+					}
+
+				}else{
+					chocoModel.trueConstraint();	
+				}
+
+
+				Solver solver= chocoModel.getSolver();
+				java.util.List solutionList= new ArrayList<Solution>();
+				solutionList=solver.findAllSolutions();
+				if((getMethodSig().getName()).equals("sayHello")){
+					if(getParent().getParent() instanceof ClassDecl){
+						System.out.println("solution solutionList()::"+solutionList);
+					}
+				}
+
+				if(solutionList.isEmpty()){
+					setBooleanValue(false);
+				}else{
+					setBooleanValue(true);
+				}
+				//solver.reset();
+
+			}else{
+				this.setBooleanValue(true);	
+				System.out.println("chocomodel Null for"+this);
+			}
+			for (int i=0; i<getNumChild(); i++) {
+				getChild(i).evaluateNodeConstraints(productFeatureSet);
+			}
+			productFeatureSet.clear();
+		}catch(Exception e){
+			System.err.println("Second Exception14 izzzzz::"+e.getMessage());
+			System.exit(1);
+		}
+	}*/
+	public void MethodImpl.evaluateNodeConstraints(ArrayList<String> productFeatureSet)
+	{
+		try{
+			LogOp tree= this.getNodeLogOpConstraint();
+			org.chocosolver.solver.Model chocoModel=this.getChocoModelField();
+			if(chocoModel!=null){
+				if(tree!=null){
+					for(BoolVarImpl var: this.getChocoVariablesList()){
+						if(productFeatureSet.contains(var.getName())){
+							if(this.getMethodSig().getName().equals("sayBye")){
+								System.out.println("Setting 1 for"+var.getName());
+							}
+							chocoModel.arithm(var,"=",1).post();
+						}else{
+							chocoModel.arithm(var,"=",0).post();
+						}
+					}
+					chocoModel.addClauses(tree);
+
+				}else{
+					chocoModel.trueConstraint();	
+				}
+
+
+				Solver solver= chocoModel.getSolver();
+				Solution s= solver.findSolution();
+				if(this.getMethodSig().getName().equals("sayBye")){
+					System.out.println("parent of parent is: "+getParent().getParent());
+					System.out.println("MethodImpl name is"+this.getMethodSig().getName());
+					System.out.println("MethodImpl block is"+this.getBlock());
+					System.out.println("Solution is"+s);
+				}
+				if(s!=null){
+					setBooleanValue(true);
+				}else{
+					setBooleanValue(false);
+				}
+				//solver.reset();
+
+			}else{
+				this.setBooleanValue(true);	
+				System.out.println("chocomodel Null for"+this);
+			}
+			for (int i=0; i<getNumChild(); i++) {
+				getChild(i).evaluateNodeConstraints(productFeatureSet);
+			}
+		}catch(Exception e){
+			System.err.println("Second Exception14 izzzzz::"+e.getMessage());
+			System.exit(1);
+		}
+	}
+
+	public void ASTNode.evaluateNodeConstraints(ArrayList<String> productFeatureSet)
+	{
+		try{
+			LogOp tree= this.getNodeLogOpConstraint();
+			org.chocosolver.solver.Model chocoModel=this.getChocoModelField();
+			if(chocoModel!=null){
+				if(tree!=null){
+					for(BoolVarImpl var: this.getChocoVariablesList()){
+						if(productFeatureSet.contains(var.getName())){
+							chocoModel.arithm(var,"=",1).post();
+						}else{
+							chocoModel.arithm(var,"=",0).post();
+						}
+					}
+					chocoModel.addClauses(tree);
+
+				}else{
+					chocoModel.trueConstraint();	
+				}
+
+
+				Solver solver= chocoModel.getSolver();
+				Solution s= solver.findSolution();
+				if(this instanceof MethodImpl){
+					System.out.println("Solution is"+s);
+				}
+				if(s!=null){
+					setBooleanValue(true);
+				}else{
+					setBooleanValue(false);
+				}
+				//solver.reset();
+
+			}else{
+				this.setBooleanValue(true);	
+				System.out.println("chocomodel Null for"+this);
+			}
+			for (int i=0; i<getNumChild(); i++) {
+				getChild(i).evaluateNodeConstraints(productFeatureSet);
+			}
+		}catch(Exception e){
+			System.err.println("Second Exception14 izzzzz::"+e.getMessage());
+			System.exit(1);
+		}
+	}
+
+
+
+	/*public void ASTNode.evaluateNodeConstraints(ArrayList<String> productFeatureSet) {
+		try{
+			for (int i=0; i<getNumChild(); i++) {
+				getChild(i).evaluateNodeConstraints(productFeatureSet);
+			}
+		}catch(Exception e){
+			System.out.println("Exceptionssssss in formConstraint"+e);
+		}
+	}*/
+
+
+
+}

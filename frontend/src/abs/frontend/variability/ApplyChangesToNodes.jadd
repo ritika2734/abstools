@@ -1,0 +1,363 @@
+import abs.frontend.ast.*;
+aspect ApplyChangesToNodes{
+
+	abstract void TraitExpr.applyChangesToClass(Modifier modifier,ClassDecl decl);
+	abstract void MethodModifier.applyChangesToClass(Modifier modifier,ClassDecl decl);
+
+	public void TraitNameExpr.applyChangesToClass(Modifier modifier,ClassDecl cls){}
+
+	public void TraitSetExpr.applyChangesToClass(Modifier modifier,ClassDecl cls){
+		System.out.println("inside  of TraitSetExpr.applyChangesToClass"+this);
+		if(getParent() instanceof ModifyMethodModifier){
+			System.out.println("Instance of ModifyMethodModufier");
+
+			for (MethodImpl modifiedMethod : getMethodImpls()){
+				String addedBy="";
+				for(MethodImpl classMethodImpl: cls.getMethods()){
+					if(classMethodImpl.getMethodSig().getName().equals(modifiedMethod.getMethodSig().getName())){
+						System.out.println("====modifiedMethod.getApplicationConditionField() "+modifiedMethod.getApplicationConditionField());
+						System.out.println("====classMethodImpl.getApplicationConditionField() "+classMethodImpl.getApplicationConditionField());
+						if (!(classMethodImpl.getMethodDeltaName().equals(modifiedMethod.getMethodDeltaName()))){
+							System.out.println("modifier:"+modifier.deltaApplicationConditionAttribute());
+							System.out.println("modifiedMethod:"+modifiedMethod.getMethodSig().getName());
+							System.out.println("modifiedMethod body:"+modifiedMethod.getBlock());
+							System.out.println("modifiedMethod getApplicationConditionField:"+modifiedMethod.getApplicationConditionField());
+							System.out.println("classMethod:"+classMethodImpl.getMethodSig().getName());
+							System.out.println("classMethod body:"+classMethodImpl.getBlock());
+							System.out.println("classMethod getApplicationConditionField: "+classMethodImpl.getApplicationConditionField());
+							addedBy=classMethodImpl.getAddedBy();
+							System.out.println("addedBy::"+addedBy);
+							AppCond oldValue=classMethodImpl.getApplicationConditionField();
+							AppCond newValue=flipTheBit(modifier.deltaApplicationConditionAttribute());
+							if(oldValue!=null){
+								classMethodImpl.setApplicationConditionField(new AppCondAnd(newValue,oldValue));
+							}else{
+								classMethodImpl.setApplicationConditionField(newValue);
+							}
+							classMethodImpl.updateApplicationConditionFieldOfChild();
+						}else{
+							System.out.println("same as class:"+classMethodImpl.getMethodSig().getName());
+							System.out.println("same as class body:"+classMethodImpl.getBlock());
+							classMethodImpl.setAddedBy(addedBy);
+							break;
+						}
+					}
+				}
+			}
+		}else if(getParent() instanceof TraitModifyExpr){
+			ASTNode expr= this.getParent();
+			while (!(expr instanceof AddMethodModifier) && !(expr instanceof ModifyMethodModifier)) {
+				System.out.println("Inside while  child "+expr);
+				expr = expr.getParent();
+				System.out.println("Inside while  parent "+expr);
+			}
+			if(expr instanceof ModifyMethodModifier){
+				for (MethodImpl modifiedMethod : getMethodImpls()){
+					String addedBy="";
+					for(MethodImpl classMethodImpl: cls.getMethods()){
+						if(classMethodImpl.getMethodSig().getName().equals(modifiedMethod.getMethodSig().getName())){
+							System.out.println("====modifiedMethod.getApplicationConditionField() "+modifiedMethod.getApplicationConditionField());
+							System.out.println("====classMethodImpl.getApplicationConditionField() "+classMethodImpl.getApplicationConditionField());
+							if (!(classMethodImpl.getMethodDeltaName().equals(modifiedMethod.getMethodDeltaName()))){
+								System.out.println("modifier:"+modifier.deltaApplicationConditionAttribute());
+								System.out.println("modifiedMethod:"+modifiedMethod.getMethodSig().getName());
+								System.out.println("modifiedMethod body:"+modifiedMethod.getBlock());
+								System.out.println("modifiedMethod getApplicationConditionField:"+modifiedMethod.getApplicationConditionField());
+								System.out.println("classMethod:"+classMethodImpl.getMethodSig().getName());
+								System.out.println("classMethod body:"+classMethodImpl.getBlock());
+								System.out.println("classMethod getApplicationConditionField: "+classMethodImpl.getApplicationConditionField());
+								addedBy=classMethodImpl.getAddedBy();
+								System.out.println("addedBy::"+addedBy);
+								AppCond oldValue=classMethodImpl.getApplicationConditionField();
+								AppCond newValue=flipTheBit(modifier.deltaApplicationConditionAttribute());
+								if(oldValue!=null){
+									classMethodImpl.setApplicationConditionField(new AppCondAnd(newValue,oldValue));
+								}else{
+									classMethodImpl.setApplicationConditionField(newValue);
+								}
+								classMethodImpl.updateApplicationConditionFieldOfChild();
+							}else{
+								System.out.println("same as class:"+classMethodImpl.getMethodSig().getName());
+								System.out.println("same as class body:"+classMethodImpl.getBlock());
+								classMethodImpl.setAddedBy(addedBy);
+								break;
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	public void TraitModifyExpr.applyChangesToClass(Modifier modifier,ClassDecl decl){
+		getTraitExpr().applyChangesToClass(modifier,decl);
+		getMethodModifier().applyChangesToClass(modifier,decl);
+	}
+
+	public void AddMethodModifier.applyChangesToClass(Modifier modifier,ClassDecl decl){
+		getTraitExpr().applyChangesToClass(modifier,decl);
+	}
+	public void ModifyMethodModifier.applyChangesToClass(Modifier modifier,ClassDecl decl){
+		System.out.println("Inside ModifyMethodModifier.applyChangesToClass");
+		getTraitExpr().applyChangesToClass(modifier,decl);
+	}
+
+	public void RemoveMethodModifier.applyChangesToClass(Modifier modifier,ClassDecl decl){
+		//getTraitExpr().applyChangesToClass(modifier,decl);
+	}
+
+
+
+	public void RemoveMethodSigModifier.applyChangesTo(ASTNode interfaceDecl){
+		try{
+			String removedMethodSigName = this.getMethodSig().getName();
+			for (MethodSig methodSig : ((InterfaceDecl)interfaceDecl).getBodys()) {
+				if((methodSig.getName()).equals(removedMethodSigName)){
+					AppCond oldValue=methodSig.getApplicationConditionField();
+					AppCond newValue=flipTheBit(this.deltaApplicationConditionAttribute());
+					if(oldValue!=null){
+						methodSig.setApplicationConditionField(new AppCondAnd(newValue,oldValue));
+					}
+					else
+						methodSig.setApplicationConditionField(newValue);	
+					methodSig.updateApplicationConditionFieldOfChild();
+				}
+			}
+		}catch(Exception e){
+			System.out.println("Exception in RemoveMethodSigModifier");
+		}
+	}
+
+	public void RemoveMethodModifier.applyChangesTo(ASTNode classDecl){
+		try{
+			for(MethodSig methodSig : this.getMethodSigs()){
+				for (MethodImpl methodImpl : ((ClassDecl)classDecl).getMethods()) {
+					if((methodImpl.getMethodSig().getName()).equals(methodSig.getName())){
+						AppCond oldValue=methodImpl.getApplicationConditionField();
+						AppCond newValue=flipTheBit(this.deltaApplicationConditionAttribute());
+						if(oldValue!=null){
+							AppCond updatedValue = new AppCondAnd(newValue,oldValue);
+							methodImpl.setApplicationConditionField(updatedValue);
+						}else{
+							methodImpl.setApplicationConditionField(newValue);
+						}
+						methodImpl.updateApplicationConditionFieldOfChild();
+						//break; check this
+					}
+				}
+			}
+		}catch(Exception e){
+			System.out.println("Exception in remove method modifier:"+e);
+		}
+	}
+
+	public void ModifyMethodModifier.applyChangesTo(ASTNode classDecl){
+		try{
+			System.out.println("Inside ModifyMethodModifier.applyChangesTo is    ::"+this.getTraitExpr());
+			ClassDecl cls= (ClassDecl)classDecl;
+			getTraitExpr().applyChangesToClass(this,cls);
+			/*for (MethodImpl modifiedMethod : set.getMethodImpls()){
+				for(MethodImpl classMethodImpl: cls.getMethods()){
+					if(classMethodImpl.getMethodSig().getName().equals(modifiedMethod.getMethodSig().getName())){
+						if (!(classMethodImpl.getApplicationConditionField()==deltaApplicationConditionAttribute())){
+							addedBy=classMethodImpl.getAddedBy();
+							AppCond oldValue=classMethodImpl.getApplicationConditionField();
+							AppCond newValue=flipTheBit(this.deltaApplicationConditionAttribute());
+							if(oldValue!=null){
+								classMethodImpl.setApplicationConditionField(new AppCondAnd(newValue,oldValue));
+							}else{
+								classMethodImpl.setApplicationConditionField(newValue);
+							}
+							classMethodImpl.updateApplicationConditionFieldOfChild();
+						}else{
+							classMethodImpl.setAddedBy(addedBy);
+							break;
+						}
+					}
+				}
+			}*/
+		}catch(Exception e){
+			System.out.println("Exception in Modify method modifier"+e);
+		}
+	}
+
+
+	public void RemoveFieldModifier.applyChangesTo(ASTNode classDecl){
+		try{
+			FieldDecl removedField = this.getFieldDecl();
+
+
+			ClassDecl cd= ((ClassDecl)classDecl);
+			for (int i = 0; i < cd.getNumField(); i++) {
+				FieldDecl field = cd.getField(i);
+				if (field.matches(removedField)) {
+					AppCond oldValue=field.getApplicationConditionField();
+					AppCond newValue=flipTheBit(this.deltaApplicationConditionAttribute());
+					if(oldValue!=null)
+						field.setApplicationConditionField(new AppCondAnd(newValue,oldValue));
+					else
+						field.setApplicationConditionField(newValue);
+					field.updateApplicationConditionFieldOfChild();
+				}
+			}
+		}catch(Exception e){
+			System.out.println("Exception in RemoveFieldModifier");
+		}
+	}
+
+	public void ModifyClassModifier.applyChangesTo(ASTNode node){
+		try{
+			ClassDecl cls = findClass();
+			boolean found=false;
+			for (InterfaceTypeUse toRemove : getRemovedInterfaces()) {
+				for (InterfaceTypeUse iface : cls.getImplementedInterfaceUseList()) {
+					if (iface.getName().equals(toRemove.getName())) {
+						//cls.getImplementedInterfaceUseList().removeChild(cls.getImplementedInterfaceUseList().getIndexOfChild(iface));// found = true;
+						AppCond oldValue=iface.getApplicationConditionField();
+						System.out.println("1"+toRemove);
+
+						AppCond newValue=flipTheBit(this.deltaApplicationConditionAttribute());
+						System.out.println("2"+toRemove);
+
+						if(oldValue!=null){
+							iface.setApplicationConditionField(new AppCondAnd(newValue,oldValue));
+							System.out.println("3"+toRemove);
+
+						}
+						else{
+							iface.setApplicationConditionField(newValue);
+							System.out.println("4"+toRemove);
+						}
+
+						iface.updateApplicationConditionFieldOfChild();
+						System.out.println("5"+toRemove);
+						found=true;
+						break;
+					}
+				}
+				if (! found)
+					throw new DeltaModellingException(getDelta(),
+							" wants to remove interface [" + toRemove.getName() + "] from class [" + cls.getName()
+							+ "]. However, the class does not implement that interface.");
+				System.out.println("6"+toRemove);
+			}
+		}catch(Exception e){
+			System.out.println("Exception in ModifyClassModifier applyChanges");
+		}
+	}
+
+	// pending..........................
+
+	public void RemoveClassModifier.applyChangesTo(ASTNode moduleDecl){
+		try{
+			String removedClass= this.getName();
+			for(Decl decl: ((ModuleDecl)moduleDecl).getDecls()){
+				if((decl instanceof ClassDecl) && ((decl.getName()).equals(removedClass))){
+					AppCond oldValue=decl.getApplicationConditionField();
+					AppCond newValue=flipTheBit(this.deltaApplicationConditionAttribute());
+					if(oldValue!=null){
+						decl.setApplicationConditionField(new AppCondAnd(newValue,oldValue));
+					}
+					else
+						decl.setApplicationConditionField(newValue);
+					decl.updateApplicationConditionFieldOfChild();
+					break;
+				}
+
+			}
+		}catch(Exception e){
+			System.out.println("Exception in RemoveClassModifier");
+		}
+	}
+
+	public void RemoveInterfaceModifier.applyChangesTo(ASTNode moduleDecl){
+		try{
+			System.out.println("Remove Interface Modifier");
+			String removedInterface= this.getName();
+			for(Decl decl: ((ModuleDecl)moduleDecl).getDecls()){
+				if((decl instanceof InterfaceDecl) && ((decl.getName()).equals(removedInterface))){
+					AppCond oldValue=decl.getApplicationConditionField();
+					AppCond newValue=flipTheBit(this.deltaApplicationConditionAttribute());
+					if(oldValue!=null){
+						decl.setApplicationConditionField(new AppCondAnd(newValue,oldValue));
+					}
+					else
+						decl.setApplicationConditionField(newValue);
+					decl.updateApplicationConditionFieldOfChild();
+					break;
+				}
+
+			}
+		}catch(Exception e){
+			System.out.println("Exception in RemoveInterfaceModifier");
+		}
+	}
+
+
+	public void ModifyTypeSynModifier.applyChangesTo(ASTNode moduleDecl){
+		try{
+			String addedBy="";
+			for(Decl decl: ((ModuleDecl)moduleDecl).getDecls()){
+				if(decl instanceof TypeSynDecl && ((decl.getName()).equals(this.getName()))){
+					if (!((decl.getModuleDeltaName()).equals(this.getModuleDeltaName()))){
+						addedBy=decl.getAddedBy();
+						AppCond oldValue=decl.getApplicationConditionField();
+						AppCond newValue=flipTheBit(this.deltaApplicationConditionAttribute());
+						if(oldValue!=null){
+							decl.setApplicationConditionField(new AppCondAnd(newValue,oldValue));
+						}else{
+							decl.setApplicationConditionField(newValue);
+						}
+						decl.updateApplicationConditionFieldOfChild();
+					}else{
+						decl.setAddedBy(addedBy);
+						break;
+					}
+				}
+			}
+		}catch(Exception e){
+			System.out.println("Exception in ModifySynTypeModifier");
+		}
+	}
+
+	public void ModifyDataTypeModifier.applyChangesTo(ASTNode moduleDecl){
+		// Acessor methods needs to be added, functional methods application condition needs to be updated.
+		try{
+			String addedBy="";
+			for(Decl decl: ((ModuleDecl)moduleDecl).getDecls()){
+				if(decl instanceof DataTypeDecl && ((decl.getName()).equals(this.getName()))){
+					if (!((decl.getModuleDeltaName()).equals(this.getModuleDeltaName()))){
+						addedBy=decl.getAddedBy();
+						AppCond oldValue=decl.getApplicationConditionField();
+						AppCond newValue=flipTheBit(this.deltaApplicationConditionAttribute());
+						if(oldValue!=null){
+							decl.setApplicationConditionField(new AppCondAnd(newValue,oldValue));
+						}else{
+							decl.setApplicationConditionField(newValue);
+						}
+						decl.updateApplicationConditionFieldOfChild();
+					}else{
+						decl.setAddedBy(addedBy);
+						break;
+					}
+				}
+			}
+		}catch(Exception e){
+			System.out.println("Exception in ModifyDataTypeModifier");
+		}
+	}
+
+	public void ModuleModifier.applyChangesTo(ASTNode node){
+		System.out.println("I am now working for "+node);
+	}
+
+	public void DeltaTraitModifier.applyChangesTo(ASTNode classDecl){
+		getMethodModifier().applyChangesToClass(this,(ClassDecl)classDecl);
+	}
+
+	public void ASTNode.applyChangesTo(ASTNode node){
+		System.out.println("I ammmmmmmmm working for "+this);
+	}
+
+
+}

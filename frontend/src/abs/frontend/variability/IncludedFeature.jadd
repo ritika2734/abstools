@@ -1,0 +1,22 @@
+aspect IncludedFeature{
+	
+	public void AppCondOr.getFeaturesIncluded(HashSet includedFeatures){
+			this.getLeft().getFeaturesIncluded(includedFeatures);
+			this.getRight().getFeaturesIncluded(includedFeatures);
+	}
+	public void AppCondAnd.getFeaturesIncluded(HashSet includedFeatures){
+		this.getLeft().getFeaturesIncluded(includedFeatures);
+		this.getRight().getFeaturesIncluded(includedFeatures);
+	}
+	public void AppCondNot.getFeaturesIncluded(HashSet includedFeatures){
+		this.getAppCond().getFeaturesIncluded(includedFeatures);
+	}
+	public void AppCondFeature.getFeaturesIncluded(HashSet includedFeatures){
+		includedFeatures.add(this.getName());
+		
+	}
+	public void AppCond.getFeaturesIncluded(HashSet includedFeatures){
+		System.out.println("Never Runsss!!");
+	}
+
+}

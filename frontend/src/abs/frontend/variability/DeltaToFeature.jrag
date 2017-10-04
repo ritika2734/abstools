@@ -1,0 +1,94 @@
+import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.constraints.nary.cnf.LogOp;
+aspect DeltaToFeature{
+
+	/*inh Model AppCond.modelAttributeValue();
+
+	eq Model.getCompilationUnit(int i).modelAttributeValue() = this;*/
+
+	syn AppCond DeltaDecl.lookupForFeatureAssociatedWithDeltaName() =lookupFtoD(getName());
+
+	inh AppCond DeltaDecl.lookupFtoD(String deltaName);
+
+	syn AppCond AppCond.nameForDelta();
+
+	eq Model.getCompilationUnit(int index).lookupFtoD(String deltaName) {
+		for(DeltaClause d: getProductLine().getDeltaClauses()){
+			if((d.getDeltaspec().getDeltaID()).equals(deltaName)){
+				return d.getAppCond().nameForDelta();
+			}
+		}
+		// Return empty list instead of null
+		return null;
+	}
+
+	eq AppCondAnd.nameForDelta(){
+		/*ArrayList<KeyValuePair> andFeatureList = new ArrayList<KeyValuePair>();
+		ArrayList<KeyValuePair> List1= this.getRight().nameForDelta();
+		ArrayList<KeyValuePair> List2= this.getLeft().nameForDelta();
+		andFeatureList.addAll(List1);
+		andFeatureList.addAll(List2);*/
+		AppCond appCondAnd= new AppCondAnd(getLeft().nameForDelta(),getRight().nameForDelta());
+		return appCondAnd;
+	}
+
+	eq AppCondOr.nameForDelta(){
+		/*
+		System.out.println("Inside or");
+		ArrayList<KeyValuePair> orFeatureList = new ArrayList<KeyValuePair>();
+		ArrayList<KeyValuePair> List1= this.getRight().nameForDelta();
+		ArrayList<KeyValuePair> List2= this.getLeft().nameForDelta();
+		ArrayList<Integer> valueList = new ArrayList<Integer>();
+		valueList.add(0);
+		valueList.add(1);
+		if(List1.size()<=1){
+			for(KeyValuePair k: List1){
+				k.setValues(valueList);
+			}
+		}
+
+		if(List2.size()<=1){
+			for(KeyValuePair k: List2){
+				k.setValues(valueList);
+			}
+		}
+
+		orFeatureList.addAll(List1);
+		orFeatureList.addAll(List2);
+
+		System.out.println("Returning or list"); */
+		AppCond appCondOr= new AppCondOr(getLeft().nameForDelta(),getRight().nameForDelta());
+		return appCondOr;
+	}
+
+	eq AppCondNot.nameForDelta(){
+		/*
+		ArrayList<KeyValuePair> notFeatureList = new ArrayList<KeyValuePair>();
+		ArrayList<KeyValuePair> List1= getAppCond().nameForDelta();
+		ArrayList<Integer> valueList = new ArrayList<Integer>();
+		valueList.add(0);
+		for(KeyValuePair k: List1){
+			k.setValues(valueList);
+		}
+		notFeatureList.addAll(List1); 
+		System.out.println("before Model attribute value is ::");
+		Model m = modelAttributeValue();
+		System.out.println("Model attribute value is ::"+m);*/
+		AppCond appCondNot = new AppCondNot(getAppCond().nameForDelta());
+		return appCondNot;
+	}
+
+	eq AppCondFeature.nameForDelta(){
+		/*AppCondFeature f1 = new AppCondFeature();
+		System.out.println(f1);
+		ArrayList<KeyValuePair> featureList = new ArrayList<KeyValuePair>();
+		KeyValuePair featureObj = new KeyValuePair();
+		ArrayList<Integer> valueList = new ArrayList<Integer>();
+		valueList.add(1);
+		featureObj.setKey(getName());
+		featureObj.setValues(valueList);
+		featureList.add(featureObj);*/
+		AppCond appCondFeature = new AppCondFeature(this.getName());
+		return appCondFeature;
+	}
+}

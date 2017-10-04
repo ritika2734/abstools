@@ -1,0 +1,59 @@
+import abs.frontend.ast.ProductLine;
+import abs.frontend.delta.*;
+aspect ModuleParameterSubstitute{
+
+	public void ProductLine.substituteModuleParams(Model model,Product product,ArrayList<DeltaDecl> deltas,String productName){
+		ArrayList<ModuleDecl>moduleDeclList = new ArrayList<ModuleDecl>();	
+		for(CompilationUnit c: model.getCompilationUnits()){
+			for(ModuleDecl mDecl: c.getModuleDecls()){
+				moduleDeclList.add(mDecl);
+			}
+		}
+		
+		for (DeltaDecl delta : deltas) {
+			try {
+				for (DeltaClause clause : this.getDeltaClauses()) {
+					if (delta.getName().equals(clause.getDeltaspec().getDeltaID()) && clause.isApplicable(product)) {
+						List<Deltaparam> params = clause.getDeltaspec().getDeltaparams();
+						delta.substituteModuleParameters(params, product.getFeatures(),moduleDeclList,productName);
+						break;
+					}
+					// We trust that there is a delta clause to match the delta, 
+					// otherwise the delta wouldn't be in the list of applicable deltas.
+				}
+			} catch (DeltaModellingWithNodeException e) {
+				if (e.getDelta() == null) {
+					throw new DeltaModellingWithNodeException(e.getNode(), delta, e.getMessage());
+				}
+			}
+		}
+
+
+
+
+		/*System.out.println("Inside ProductLine.substituteModuleParams");
+		for(ModuleDecl moduleDecl: model.getModuleDecls()){
+			for (DeltaClause clause : getDeltaClauses()) {
+				List<Deltaparam> params = clause.getDeltaspec().getDeltaparams();
+				moduleDecl.substituteModuleParameters(params, product.getFeatures(),deltas);
+				break;
+			}
+		}*/
+	}
+
+
+	public void DeltaDecl.substituteModuleParameters(List<Deltaparam> dparams,List<Feature> features,ArrayList<ModuleDecl> moduleDecls,String productName){
+		HashMap<String,Value> subst = new HashMap<String,Value>();
+		
+		
+		for (int i = 0; i < dparams.getNumChild(); i++)
+			subst.put(this.getParam(i).getName(), dparams.getChildNoTransform(i).calcValue(features));
+		
+		if (getModel().verbose) System.err.println("--- applying delta parameters [" + getName() + "]: " + subst+" to product "+productName);
+		
+		for(ModuleDecl moduleDecl: moduleDecls){
+			moduleDecl.applySubstitution(subst);
+		}
+	}
+
+}

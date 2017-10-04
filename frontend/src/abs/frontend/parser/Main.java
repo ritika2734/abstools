@@ -70,10 +70,15 @@ public class Main {
     protected boolean ignoreattr = false ;
     protected boolean minimise = false ;
     protected boolean maximise = false ;
+    protected boolean variability=false;
 
 
     public static void main(final String... args)  {
+        Long start = System.currentTimeMillis();
         new Main().mainMethod(args);
+        long time = System.currentTimeMillis() - start;
+        System.err.println("End  time product in milliseconds::"+System.currentTimeMillis());
+        System.err.println("Elapsed time in milliseconds::"+time);
     }
 
     public void mainMethod(final String... args) {
@@ -159,6 +164,8 @@ public class Main {
                 solve = true;
             } else if (arg.equals("-solveall")) {
                 solveall = true;
+            } else if (arg.equals("-variability")) {
+                variability = true;
             } else if (arg.startsWith("-solveWith=")) {
                 solveWith = true;
                 product = arg.split("=")[1];
@@ -258,28 +265,69 @@ public class Main {
         }
 
         m.evaluateAllProductDeclarations(); // resolve ProductExpressions to simple sets of features
-        rewriteModel(m, product);
-        m.flattenTraitOnly();
-        m.collapseTraitModifiers();
+        if(!variability){
+            rewriteModel(m, product);
+            m.flattenTraitOnly();
+            m.collapseTraitModifiers();
 
-        // check PL before flattening
-        if (checkspl)
-            typeCheckProductLine(m);
+            // check PL before flattening
+            if (checkspl)
+                typeCheckProductLine(m);
 
-        // flatten before checking error, to avoid calculating *wrong* attributes
-        if (fullabs) {
-            if (product == null) {
-                // Build all SPL configurations (valid feature selections, ignoring attributes), one by one (for performance measuring)
-                if (verbose)
-                    System.out.println("Building ALL " + m.getProductList().getNumChild() + " feature model configurations...");
-                ProductLineAnalysisHelper.buildAllConfigurations(m);
-                return;
+            // flatten before checking error, to avoid calculating *wrong* attributes
+            if (fullabs) {
+                if (product == null) {
+                    // Build all SPL configurations (valid feature selections, ignoring attributes), one by one (for performance measuring)
+                    if (verbose)
+                        System.out.println("Building ALL " + m.getProductList().getNumChild() + " feature model configurations...");
+                    ProductLineAnalysisHelper.buildAllConfigurations(m);
+                    return;
+                }
+                if (typecheck)
+                    // apply deltas that correspond to given product
+                    m.flattenForProduct(product);
+                else
+                    m.flattenForProductUnsafe(product);
             }
-            if (typecheck)
-                // apply deltas that correspond to given product
-                m.flattenForProduct(product);
-            else
-                m.flattenForProductUnsafe(product);
+        }else{
+            ArrayList<String> sortedDeltaidsNameList = new ArrayList<String>();
+            ArrayList<DeltaDecl> deltas = new ArrayList<DeltaDecl>();
+            ProductLine pl= m.getProductLine();
+            if(product!=null)
+                m.findProduct(product);
+            Long timeStartVariability=System.currentTimeMillis();
+            //m.flushTreeCache();
+            m.variabilityAST(pl,sortedDeltaidsNameList,deltas);
+            System.out.println("sortedDeltaidsNameList::"+sortedDeltaidsNameList);
+            //long timeEndVariability = System.currentTimeMillis() - timeStartVariability;
+            //System.err.println("Elapsed time in variabilityAST milliseconds::"+timeEndVariability);
+            m.chocoModelFormation();
+            //long timeEndChoco = System.currentTimeMillis() - timeStartVariability;
+            //System.err.println("Elapsed time in chcoModelFormation milliseconds::"+timeEndChoco);
+            m.formConstraintForEachNode(); 
+            long timeEndConstraintForming = System.currentTimeMillis() - timeStartVariability;
+            System.err.println("Fixed Elapsed time in variability milliseconds::"+timeEndConstraintForming);
+            Long timeStartProduct=System.currentTimeMillis();
+            if(product!=null){
+                // Substituting delta parameters
+                ProductDecl productDecl=m.findProduct(product);
+                Product productFromDecl=productDecl.getProduct();
+                pl.substituteModuleParams(m, productFromDecl,deltas,product);
+                //long timeEndSubstitution = System.currentTimeMillis() - timeStartVariability;
+                //System.err.println("Elapsed time in variable substitution milliseconds::"+timeEndSubstitution);
+                m.evaluateNodeConstraints(productFromDecl);
+                //long timeEndEvaluation = System.currentTimeMillis() - timeStartVariability;
+                //System.err.println("Elapsed time in evaluationof constraints milliseconds::"+timeEndEvaluation);
+                m.traverseToRemoveNodes(m,sortedDeltaidsNameList);
+                //long timeEndTraversalRemoval = System.currentTimeMillis() - timeStartVariability;
+                System.err.println("Elapsed time in product milliseconds::"+timeStartProduct);
+
+            }
+            System.out.println("mODIFIED running");
+            //for (CompilationUnit unit: m.getCompilationUnits())
+              //  for (ModuleDecl module: unit.getModuleDecls())
+                //    module.flushCache();
+
         }
 
         if (dump) {

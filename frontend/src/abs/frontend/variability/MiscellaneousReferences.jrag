@@ -1,0 +1,81 @@
+aspect InterfaceReference {
+	syn InterfaceDecl InterfaceModifier.getInterfaceDecl() {
+		return this.findInterface();
+	}
+
+
+}
+
+aspect FlipTheBit{
+	public AppCond ASTNode.flipTheBit(AppCond appCond){
+		return new AppCondNot(appCond);
+	}	
+}
+
+aspect BooleanAttribute{
+	private boolean ASTNode.booleanValue;
+
+	public boolean ASTNode.getBooleanValue(){
+		return this.booleanValue;
+	} 
+	public void ASTNode.setBooleanValue(boolean val){
+		this.booleanValue=val;
+	}
+}
+
+aspect createModelCopy{
+	public Model Model.createModelCopy(Model m){
+		abs.frontend.ast.List<CompilationUnit> compilationUnitCopy= new abs.frontend.ast.List<CompilationUnit>();
+			for(int i=0;i< getNumCompilationUnit();i++){
+				//System.out.println("Setting CU  "+i+" ");
+				LogOp nodeLogOp= getCompilationUnit(i).getNodeLogOpConstraint();
+				org.chocosolver.solver.Model chocoModelField= getCompilationUnit(i).getChocoModelField();
+				//System.out.println("Setting nodeLogOp  "+nodeLogOp+" Setting chocoModelField"+chocoModelField);
+				compilationUnitCopy.setChocoModelField(chocoModelField);
+				compilationUnitCopy.setNodeLogOpConstraint(nodeLogOp);
+				compilationUnitCopy.add(getCompilationUnit(i).treeCopyNoTransform());
+			}
+		Model modelCopy= new Model(compilationUnitCopy);
+		modelCopy.setNodeLogOpConstraint(m.getNodeLogOpConstraint());
+		modelCopy.setChocoModelField(m.getChocoModelField());
+		//System.out.println("Getting nodeLogOp Model  "+modelCopy.getNodeLogOpConstraint()+" Setting chocoModelField"+modelCopy.getChocoModelField());
+		//System.out.println("Returning model");
+		return modelCopy;
+	}
+}
+
+
+
+aspect ModifiedNodeDelta{
+	private String Decl.moduleDeltaName = new String();
+	private String ModifyDataTypeModifier.moduleDeltaName = new String();
+	private String ModifyTypeSynModifier.moduleDeltaName = new String();
+	
+	
+	public String ModifyTypeSynModifier.getModuleDeltaName(){
+		return this.moduleDeltaName;
+	}
+
+	public void ModifyTypeSynModifier.setModuleDeltaName(String value){
+		this.moduleDeltaName=value;
+	}
+	
+	public String ModifyDataTypeModifier.getModuleDeltaName(){
+		return this.moduleDeltaName;
+	}
+
+	public void ModifyDataTypeModifier.setModuleDeltaName(String value){
+		this.moduleDeltaName=value;
+	}
+	
+	public String Decl.getModuleDeltaName(){
+		return this.moduleDeltaName;
+	}
+
+	public void Decl.setModuleDeltaName(String value){
+		this.moduleDeltaName=value;
+	}
+	
+	
+}
+

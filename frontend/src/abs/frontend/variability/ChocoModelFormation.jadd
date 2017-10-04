@@ -1,0 +1,389 @@
+import org.chocosolver.solver.*;
+import org.chocosolver.solver.variables.impl.BoolVarImpl;
+
+aspect ChocoModelFormation{
+
+	public void Model.chocoModelFormation(){
+
+		chocoModelFormation(this.features());
+
+	}
+
+	/**
+	 * Creates a choco solver model for every AST node. 
+	 * 
+	 * @param  featuresList   the list of all the parameters present in the feature models
+	 *s
+	 */
+	/*public void ClassDecl.chocoModelFormation(ArrayList<String> featuresList){
+		try{
+			org.chocosolver.solver.Model chocoModel = new org.chocosolver.solver.Model("my first problem for "+this); 
+			// Variable intialization of Choco Model
+			ArrayList<BoolVarImpl> chocoVariablesList = new ArrayList<BoolVarImpl>();
+			for(String feature : featuresList){
+				chocoVariablesList.add(new BoolVarImpl(feature,chocoModel));
+			}
+			this.setChocoModelField(chocoModel);
+			this.setChocoVariablesList(chocoVariablesList);
+			for (int i=0; i<getNumChild(); i++){
+				getChild(i).chocoModelFormation(featuresList);
+			}
+			featuresList=null;
+		}catch(Exception e){
+			System.err.println("Error during formation of chocomodel");
+			System.exit(1);
+		}
+
+	}
+	
+	public void ParamDecl.chocoModelFormation(ArrayList<String> featuresList){
+		try{
+			org.chocosolver.solver.Model chocoModel = new org.chocosolver.solver.Model("my first problem for "+this); 
+			// Variable intialization of Choco Model
+			ArrayList<BoolVarImpl> chocoVariablesList = new ArrayList<BoolVarImpl>();
+			for(String feature : featuresList){
+				chocoVariablesList.add(new BoolVarImpl(feature,chocoModel));
+			}
+			this.setChocoModelField(chocoModel);
+			this.setChocoVariablesList(chocoVariablesList);
+			for (int i=0; i<getNumChild(); i++){
+				getChild(i).chocoModelFormation(featuresList);
+			}
+			featuresList=null;
+		}catch(Exception e){
+			System.err.println("Error during formation of chocomodel");
+			System.exit(1);
+		}
+
+	}
+	
+	public void InterfaceDecl.chocoModelFormation(ArrayList<String> featuresList){
+		try{
+			org.chocosolver.solver.Model chocoModel = new org.chocosolver.solver.Model("my first problem for "+this); 
+			// Variable intialization of Choco Model
+			ArrayList<BoolVarImpl> chocoVariablesList = new ArrayList<BoolVarImpl>();
+			for(String feature : featuresList){
+				chocoVariablesList.add(new BoolVarImpl(feature,chocoModel));
+			}
+			this.setChocoModelField(chocoModel);
+			this.setChocoVariablesList(chocoVariablesList);
+			for (int i=0; i<getNumChild(); i++){
+				getChild(i).chocoModelFormation(featuresList);
+			}
+			featuresList=null;
+		}catch(Exception e){
+			System.err.println("Error during formation of chocomodel");
+			System.exit(1);
+		}
+
+	}
+	
+	public void MethodImpl.chocoModelFormation(ArrayList<String> featuresList){
+		try{
+			org.chocosolver.solver.Model chocoModel = new org.chocosolver.solver.Model("my first problem for "+this); 
+			// Variable intialization of Choco Model
+			ArrayList<BoolVarImpl> chocoVariablesList = new ArrayList<BoolVarImpl>();
+			for(String feature : featuresList){
+				chocoVariablesList.add(new BoolVarImpl(feature,chocoModel));
+			}
+			this.setChocoModelField(chocoModel);
+			this.setChocoVariablesList(chocoVariablesList);
+			for (int i=0; i<getNumChild(); i++){
+				getChild(i).chocoModelFormation(featuresList);
+			}
+			featuresList=null;
+		}catch(Exception e){
+			System.err.println("Error during formation of chocomodel");
+			System.exit(1);
+		}
+
+	}
+	
+	public void MethodSig.chocoModelFormation(ArrayList<String> featuresList){
+		try{
+			org.chocosolver.solver.Model chocoModel = new org.chocosolver.solver.Model("my first problem for "+this); 
+			// Variable intialization of Choco Model
+			ArrayList<BoolVarImpl> chocoVariablesList = new ArrayList<BoolVarImpl>();
+			for(String feature : featuresList){
+				chocoVariablesList.add(new BoolVarImpl(feature,chocoModel));
+			}
+			this.setChocoModelField(chocoModel);
+			this.setChocoVariablesList(chocoVariablesList);
+			for (int i=0; i<getNumChild(); i++){
+				getChild(i).chocoModelFormation(featuresList);
+			}
+			featuresList=null;
+		}catch(Exception e){
+			System.err.println("Error during formation of chocomodel");
+			System.exit(1);
+		}
+
+	}
+	
+	public void FieldDecl.chocoModelFormation(ArrayList<String> featuresList){
+		try{
+			org.chocosolver.solver.Model chocoModel = new org.chocosolver.solver.Model("my first problem for "+this); 
+			// Variable intialization of Choco Model
+			ArrayList<BoolVarImpl> chocoVariablesList = new ArrayList<BoolVarImpl>();
+			for(String feature : featuresList){
+				chocoVariablesList.add(new BoolVarImpl(feature,chocoModel));
+			}
+			this.setChocoModelField(chocoModel);
+			this.setChocoVariablesList(chocoVariablesList);
+			for (int i=0; i<getNumChild(); i++){
+				getChild(i).chocoModelFormation(featuresList);
+			}
+			featuresList=null;
+		}catch(Exception e){
+			System.err.println("Error during formation of chocomodel");
+			System.exit(1);
+		}
+
+	}
+	
+	public void InterfaceTypeUse.chocoModelFormation(ArrayList<String> featuresList){
+		try{
+			org.chocosolver.solver.Model chocoModel = new org.chocosolver.solver.Model("my first problem for "+this); 
+			// Variable intialization of Choco Model
+			ArrayList<BoolVarImpl> chocoVariablesList = new ArrayList<BoolVarImpl>();
+			for(String feature : featuresList){
+				chocoVariablesList.add(new BoolVarImpl(feature,chocoModel));
+			}
+			this.setChocoModelField(chocoModel);
+			this.setChocoVariablesList(chocoVariablesList);
+			for (int i=0; i<getNumChild(); i++){
+				getChild(i).chocoModelFormation(featuresList);
+			}
+			featuresList=null;
+		}catch(Exception e){
+			System.err.println("Error during formation of chocomodel");
+			System.exit(1);
+		}
+
+	}
+	
+	
+	public void FunctionDecl.chocoModelFormation(ArrayList<String> featuresList){
+		try{
+			org.chocosolver.solver.Model chocoModel = new org.chocosolver.solver.Model("my first problem for "+this); 
+			// Variable intialization of Choco Model
+			ArrayList<BoolVarImpl> chocoVariablesList = new ArrayList<BoolVarImpl>();
+			for(String feature : featuresList){
+				chocoVariablesList.add(new BoolVarImpl(feature,chocoModel));
+			}
+			this.setChocoModelField(chocoModel);
+			this.setChocoVariablesList(chocoVariablesList);
+			for (int i=0; i<getNumChild(); i++){
+				getChild(i).chocoModelFormation(featuresList);
+			}
+			featuresList=null;
+		}catch(Exception e){
+			System.err.println("Error during formation of chocomodel");
+			System.exit(1);
+		}
+
+	}
+	
+	public void ParametricFunctionDecl.chocoModelFormation(ArrayList<String> featuresList){
+		try{
+			org.chocosolver.solver.Model chocoModel = new org.chocosolver.solver.Model("my first problem for "+this); 
+			// Variable intialization of Choco Model
+			ArrayList<BoolVarImpl> chocoVariablesList = new ArrayList<BoolVarImpl>();
+			for(String feature : featuresList){
+				chocoVariablesList.add(new BoolVarImpl(feature,chocoModel));
+			}
+			this.setChocoModelField(chocoModel);
+			this.setChocoVariablesList(chocoVariablesList);
+			for (int i=0; i<getNumChild(); i++){
+				getChild(i).chocoModelFormation(featuresList);
+			}
+			featuresList=null;
+		}catch(Exception e){
+			System.err.println("Error during formation of chocomodel");
+			System.exit(1);
+		}
+
+	}
+	
+	public void DataTypeDecl.chocoModelFormation(ArrayList<String> featuresList){
+		try{
+			org.chocosolver.solver.Model chocoModel = new org.chocosolver.solver.Model("my first problem for "+this); 
+			// Variable intialization of Choco Model
+			ArrayList<BoolVarImpl> chocoVariablesList = new ArrayList<BoolVarImpl>();
+			for(String feature : featuresList){
+				chocoVariablesList.add(new BoolVarImpl(feature,chocoModel));
+			}
+			this.setChocoModelField(chocoModel);
+			this.setChocoVariablesList(chocoVariablesList);
+			for (int i=0; i<getNumChild(); i++){
+				getChild(i).chocoModelFormation(featuresList);
+			}
+			featuresList=null;
+		}catch(Exception e){
+			System.err.println("Error during formation of chocomodel");
+			System.exit(1);
+		}
+
+	}
+	
+	public void ParametricDataTypeDecl.chocoModelFormation(ArrayList<String> featuresList){
+		try{
+			org.chocosolver.solver.Model chocoModel = new org.chocosolver.solver.Model("my first problem for "+this); 
+			// Variable intialization of Choco Model
+			ArrayList<BoolVarImpl> chocoVariablesList = new ArrayList<BoolVarImpl>();
+			for(String feature : featuresList){
+				chocoVariablesList.add(new BoolVarImpl(feature,chocoModel));
+			}
+			this.setChocoModelField(chocoModel);
+			this.setChocoVariablesList(chocoVariablesList);
+			for (int i=0; i<getNumChild(); i++){
+				getChild(i).chocoModelFormation(featuresList);
+			}
+			featuresList=null;
+		}catch(Exception e){
+			System.err.println("Error during formation of chocomodel");
+			System.exit(1);
+		}
+
+	}
+	
+	public void Export.chocoModelFormation(ArrayList<String> featuresList){
+		try{
+			org.chocosolver.solver.Model chocoModel = new org.chocosolver.solver.Model("my first problem for "+this); 
+			// Variable intialization of Choco Model
+			ArrayList<BoolVarImpl> chocoVariablesList = new ArrayList<BoolVarImpl>();
+			for(String feature : featuresList){
+				chocoVariablesList.add(new BoolVarImpl(feature,chocoModel));
+			}
+			this.setChocoModelField(chocoModel);
+			this.setChocoVariablesList(chocoVariablesList);
+			for (int i=0; i<getNumChild(); i++){
+				getChild(i).chocoModelFormation(featuresList);
+			}
+			featuresList=null;
+		}catch(Exception e){
+			System.err.println("Error during formation of chocomodel");
+			System.exit(1);
+		}
+
+	}
+	
+	public void Import.chocoModelFormation(ArrayList<String> featuresList){
+		try{
+			org.chocosolver.solver.Model chocoModel = new org.chocosolver.solver.Model("my first problem for "+this); 
+			// Variable intialization of Choco Model
+			ArrayList<BoolVarImpl> chocoVariablesList = new ArrayList<BoolVarImpl>();
+			for(String feature : featuresList){
+				chocoVariablesList.add(new BoolVarImpl(feature,chocoModel));
+			}
+			this.setChocoModelField(chocoModel);
+			this.setChocoVariablesList(chocoVariablesList);
+			for (int i=0; i<getNumChild(); i++){
+				getChild(i).chocoModelFormation(featuresList);
+			}
+			featuresList=null;
+		}catch(Exception e){
+			System.err.println("Error during formation of chocomodel");
+			System.exit(1);
+		}
+
+	}
+	
+	/*public void ASTNode.chocoModelFormation(ArrayList<String> featuresList){
+		try{
+			org.chocosolver.solver.Model chocoModel = new org.chocosolver.solver.Model("my first problem for "+this); 
+			// Variable intialization of Choco Model
+			ArrayList<BoolVarImpl> chocoVariablesList = new ArrayList<BoolVarImpl>();
+			for(String feature : featuresList){
+				chocoVariablesList.add(new BoolVarImpl(feature,chocoModel));
+			}
+			this.setChocoModelField(chocoModel);
+			this.setChocoVariablesList(chocoVariablesList);
+			for (int i=0; i<getNumChild(); i++){
+				getChild(i).chocoModelFormation(featuresList);
+			}
+			featuresList=null;
+		}catch(Exception e){
+			System.err.println("Error during formation of chocomodel");
+			System.exit(1);
+		}
+
+	}
+	
+	public void ASTNode.chocoModelFormation(ArrayList<String> featuresList){
+		try{
+			org.chocosolver.solver.Model chocoModel = new org.chocosolver.solver.Model("my first problem for "+this); 
+			// Variable intialization of Choco Model
+			ArrayList<BoolVarImpl> chocoVariablesList = new ArrayList<BoolVarImpl>();
+			for(String feature : featuresList){
+				chocoVariablesList.add(new BoolVarImpl(feature,chocoModel));
+			}
+			this.setChocoModelField(chocoModel);
+			this.setChocoVariablesList(chocoVariablesList);
+			for (int i=0; i<getNumChild(); i++){
+				getChild(i).chocoModelFormation(featuresList);
+			}
+			featuresList=null;
+		}catch(Exception e){
+			System.err.println("Error during formation of chocomodel");
+			System.exit(1);
+		}
+
+	}
+	
+	public void ASTNode.chocoModelFormation(ArrayList<String> featuresList){
+		try{
+			org.chocosolver.solver.Model chocoModel = new org.chocosolver.solver.Model("my first problem for "+this); 
+			// Variable intialization of Choco Model
+			ArrayList<BoolVarImpl> chocoVariablesList = new ArrayList<BoolVarImpl>();
+			for(String feature : featuresList){
+				chocoVariablesList.add(new BoolVarImpl(feature,chocoModel));
+			}
+			this.setChocoModelField(chocoModel);
+			this.setChocoVariablesList(chocoVariablesList);
+			for (int i=0; i<getNumChild(); i++){
+				getChild(i).chocoModelFormation(featuresList);
+			}
+			featuresList=null;
+		}catch(Exception e){
+			System.err.println("Error during formation of chocomodel");
+			System.exit(1);
+		}
+
+	}*/
+	
+	public void ASTNode.chocoModelFormation(ArrayList<String> featuresList){
+		try{
+			org.chocosolver.solver.Model chocoModel = new org.chocosolver.solver.Model("my first problem for "+this); 
+			// Variable intialization of Choco Model
+			ArrayList<BoolVarImpl> chocoVariablesList = new ArrayList<BoolVarImpl>();
+			for(String feature : featuresList){
+				chocoVariablesList.add(new BoolVarImpl(feature,chocoModel));
+			}
+			this.setChocoModelField(chocoModel);
+			this.setChocoVariablesList(chocoVariablesList);
+			for (int i=0; i<getNumChild(); i++){
+				getChild(i).chocoModelFormation(featuresList);
+			}
+			featuresList=null;
+		}catch(Exception e){
+			System.err.println("Error during formation of chocomodel");
+			System.exit(1);
+		}
+
+	}
+	
+	/*public void ASTNode.chocoModelFormation(ArrayList<String> featuresList){
+		try{
+			for (int i=0; i<getNumChild(); i++){
+				getChild(i).chocoModelFormation(featuresList);
+			}
+			featuresList=null;
+		}catch(Exception e){
+			System.err.println("Error during formation of chocomodel");
+			System.exit(1);
+		}
+
+	}*/
+
+}

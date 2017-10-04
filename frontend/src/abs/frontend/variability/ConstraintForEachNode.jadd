@@ -1,0 +1,589 @@
+/*import static org.chocosolver.solver.constraints.nary.cnf.LogOp.*;
+import static org.chocosolver.solver.constraints.nary.cnf.LogOp;
+import static org.chocosolver.solver.constraints.nary.cnf.LogOp.and;
+import org.chocosolver.solver.constraints.nary.cnf.SatConstraint;*/
+import org.chocosolver.solver.constraints.nary.cnf.ILogical;
+//import org.chocosolver.solver.constraints.nary.cnf.LogOp.*;
+//import org.chocosolver.solver.constraints.nary.cnf.LogOp.Type;
+
+aspect ConstraintForEachNode{
+
+	private LogOp ASTNode.nodeLogOpConstraint;//org.chocosolver.solver.Model.trueConstraint();
+	public LogOp ASTNode.getNodeLogOpConstraint(){
+		return this.nodeLogOpConstraint;
+	}
+	public void ASTNode.setNodeLogOpConstraint(LogOp logOp){
+		this.nodeLogOpConstraint=logOp;
+	}
+
+	/*
+	 * This method converts the applicationConditionField to choco solver constraint
+	 * 
+	 * */
+	public void Model.formConstraintForEachNode() {
+		try{
+			formConstraintForEachNode(this);
+		}catch(Exception e){
+			System.out.println("Exception in formConstraint"+e);
+		}
+	}
+
+
+	/*public void ClassDecl.formConstraintForEachNode(Model m) {
+		AppCond applicationCondition=this.getApplicationConditionField();
+		//LogOp nodeConstraint;
+		try{
+			if(applicationCondition!=null){
+				HashSet<String> includedFeatures= new HashSet<String>();
+				HashSet<String> parentFeatures= new HashSet<String>();
+				applicationCondition.getFeaturesIncluded(includedFeatures);
+				m.collectParents(includedFeatures,parentFeatures);
+				includedFeatures.addAll(parentFeatures);
+				//nodeConstraint=applicationCondition.getConstraint(this.getChocoVariablesList(),m);
+				this.setNodeLogOpConstraint(applicationCondition.getConstraint(this.getChocoVariablesList(),m));
+				for(BoolVarImpl var: this.getChocoVariablesList()){
+					if (!includedFeatures.contains(var.getName()))
+						this.setNodeLogOpConstraint(LogOp.and(this.getNodeLogOpConstraint(),LogOp.or(var,LogOp.nor(var))));
+				}
+
+				for(BoolVarImpl var: this.getChocoVariablesList()){
+					if(parentFeatures.contains(var.getName()))
+						this.setNodeLogOpConstraint(LogOp.and(this.getNodeLogOpConstraint(),var));
+				}
+			}
+			for (int i=0; i<getNumChild(); i++) {	
+				getChild(i).formConstraintForEachNode(m);
+			}
+		}catch(Exception e){
+			System.out.println("Exception in formConstraint"+e);
+		}
+	}
+
+	public void InterfaceTypeUse.formConstraintForEachNode(Model m) {
+		AppCond applicationCondition=this.getApplicationConditionField();
+		//LogOp nodeConstraint;
+		try{
+			if(applicationCondition!=null){
+				HashSet<String> includedFeatures= new HashSet<String>();
+				HashSet<String> parentFeatures= new HashSet<String>();
+				applicationCondition.getFeaturesIncluded(includedFeatures);
+				m.collectParents(includedFeatures,parentFeatures);
+				includedFeatures.addAll(parentFeatures);
+				//nodeConstraint=applicationCondition.getConstraint(this.getChocoVariablesList(),m);
+				this.setNodeLogOpConstraint(applicationCondition.getConstraint(this.getChocoVariablesList(),m));
+				for(BoolVarImpl var: this.getChocoVariablesList()){
+					if (!includedFeatures.contains(var.getName()))
+						this.setNodeLogOpConstraint(LogOp.and(this.getNodeLogOpConstraint(),LogOp.or(var,LogOp.nor(var))));
+				}
+
+				for(BoolVarImpl var: this.getChocoVariablesList()){
+					if(parentFeatures.contains(var.getName()))
+						this.setNodeLogOpConstraint(LogOp.and(this.getNodeLogOpConstraint(),var));
+				}
+			}
+			for (int i=0; i<getNumChild(); i++) {	
+				getChild(i).formConstraintForEachNode(m);
+			}
+		}catch(Exception e){
+			System.out.println("Exception in formConstraint"+e);
+		}
+	}
+
+
+
+	public void MethodImpl.formConstraintForEachNode(Model m) {
+		AppCond applicationCondition=this.getApplicationConditionField();
+		//LogOp nodeConstraint;
+		try{
+			if(applicationCondition!=null){
+				HashSet<String> includedFeatures= new HashSet<String>();
+				HashSet<String> parentFeatures= new HashSet<String>();
+				applicationCondition.getFeaturesIncluded(includedFeatures);
+				m.collectParents(includedFeatures,parentFeatures);
+				includedFeatures.addAll(parentFeatures);
+
+				//nodeConstraint=applicationCondition.getConstraint(this.getChocoVariablesList(),m);
+				this.setNodeLogOpConstraint(applicationCondition.getConstraint(this.getChocoVariablesList(),m));
+				//All child nodes
+				for(BoolVarImpl var: this.getChocoVariablesList()){
+					if (!includedFeatures.contains(var.getName())){
+						this.setNodeLogOpConstraint(LogOp.and(this.getNodeLogOpConstraint(),LogOp.or(var,LogOp.nor(var))));
+					}
+				}
+				// All parent nodes
+				for(BoolVarImpl var: this.getChocoVariablesList()){
+					if(parentFeatures.contains(var.getName())){
+						this.setNodeLogOpConstraint(LogOp.and(this.getNodeLogOpConstraint(),var));
+					}
+				}
+			}
+			for (int i=0; i<getNumChild(); i++) {	
+				getChild(i).formConstraintForEachNode(m);
+			}
+		}catch(Exception e){
+			System.out.println("Exception in formConstraint"+e);
+		}
+	}
+
+	public void FieldDecl.formConstraintForEachNode(Model m) {
+		AppCond applicationCondition=this.getApplicationConditionField();
+		//LogOp nodeConstraint;
+		try{
+			if(applicationCondition!=null){
+				HashSet<String> includedFeatures= new HashSet<String>();
+				HashSet<String> parentFeatures= new HashSet<String>();
+				applicationCondition.getFeaturesIncluded(includedFeatures);
+				m.collectParents(includedFeatures,parentFeatures);
+				includedFeatures.addAll(parentFeatures);
+				//nodeConstraint=applicationCondition.getConstraint(this.getChocoVariablesList(),m);
+				this.setNodeLogOpConstraint(applicationCondition.getConstraint(this.getChocoVariablesList(),m));
+				for(BoolVarImpl var: this.getChocoVariablesList()){
+					if (!includedFeatures.contains(var.getName()))
+						this.setNodeLogOpConstraint(LogOp.and(this.getNodeLogOpConstraint(),LogOp.or(var,LogOp.nor(var))));
+				}
+				for(BoolVarImpl var: this.getChocoVariablesList()){
+					if(parentFeatures.contains(var.getName()))
+						this.setNodeLogOpConstraint(LogOp.and(this.getNodeLogOpConstraint(),var));
+				}
+			}
+			for (int i=0; i<getNumChild(); i++) {	
+				getChild(i).formConstraintForEachNode(m);
+			}
+		}catch(Exception e){
+			System.out.println("Exception in formConstraint"+e);
+		}
+	}
+
+	public void InterfaceDecl.formConstraintForEachNode(Model m) {
+		AppCond applicationCondition=this.getApplicationConditionField();
+		//LogOp nodeConstraint;
+		try{
+			if(applicationCondition!=null){
+				HashSet<String> includedFeatures= new HashSet<String>();
+				HashSet<String> parentFeatures= new HashSet<String>();
+				applicationCondition.getFeaturesIncluded(includedFeatures);
+				m.collectParents(includedFeatures,parentFeatures);
+				includedFeatures.addAll(parentFeatures);
+				//nodeConstraint=applicationCondition.getConstraint(this.getChocoVariablesList(),m);
+				this.setNodeLogOpConstraint(applicationCondition.getConstraint(this.getChocoVariablesList(),m));
+				for(BoolVarImpl var: this.getChocoVariablesList()){
+					if (!includedFeatures.contains(var.getName()))
+						this.setNodeLogOpConstraint(LogOp.and(this.getNodeLogOpConstraint(),LogOp.or(var,LogOp.nor(var))));
+				}
+				for(BoolVarImpl var: this.getChocoVariablesList()){
+					if(parentFeatures.contains(var.getName()))
+						this.setNodeLogOpConstraint(LogOp.and(this.getNodeLogOpConstraint(),var));
+				}
+			}
+			for (int i=0; i<getNumChild(); i++) {	
+				getChild(i).formConstraintForEachNode(m);
+			}
+		}catch(Exception e){
+			System.out.println("Exception in formConstraint"+e);
+		}
+	}
+
+	public void MethodSig.formConstraintForEachNode(Model m) {
+		AppCond applicationCondition=this.getApplicationConditionField();
+		//LogOp nodeConstraint;
+		try{
+			if(applicationCondition!=null){
+				HashSet<String> includedFeatures= new HashSet<String>();
+				HashSet<String> parentFeatures= new HashSet<String>();
+				applicationCondition.getFeaturesIncluded(includedFeatures);
+				m.collectParents(includedFeatures,parentFeatures);
+				includedFeatures.addAll(parentFeatures);
+				//nodeConstraint=applicationCondition.getConstraint(this.getChocoVariablesList(),m);
+				this.setNodeLogOpConstraint(applicationCondition.getConstraint(this.getChocoVariablesList(),m));
+				for(BoolVarImpl var: this.getChocoVariablesList()){
+					if (!includedFeatures.contains(var.getName())){
+						this.setNodeLogOpConstraint(LogOp.and(this.getNodeLogOpConstraint(),LogOp.or(var,LogOp.nor(var))));
+					}
+				}
+				for(BoolVarImpl var: this.getChocoVariablesList()){
+					if(parentFeatures.contains(var.getName()))
+						this.setNodeLogOpConstraint(LogOp.and(this.getNodeLogOpConstraint(),var));
+				}
+			}
+			for (int i=0; i<getNumChild(); i++) {	
+				getChild(i).formConstraintForEachNode(m);
+			}
+		}catch(Exception e){
+			System.out.println("Exception in formConstraint"+e);
+		}
+	}
+
+	//Functions ParametricFunctionDecl,FunctionDecl
+	public void ParametricFunctionDecl.formConstraintForEachNode(Model m) {
+		AppCond applicationCondition=this.getApplicationConditionField();
+		//LogOp nodeConstraint;
+		try{
+			if(applicationCondition!=null){
+				HashSet<String> includedFeatures= new HashSet<String>();
+				HashSet<String> parentFeatures= new HashSet<String>();
+				applicationCondition.getFeaturesIncluded(includedFeatures);
+				m.collectParents(includedFeatures,parentFeatures);
+				includedFeatures.addAll(parentFeatures);
+				//nodeConstraint=applicationCondition.getConstraint(this.getChocoVariablesList(),m);
+				this.setNodeLogOpConstraint(applicationCondition.getConstraint(this.getChocoVariablesList(),m));
+				for(BoolVarImpl var: this.getChocoVariablesList()){
+					if (!includedFeatures.contains(var.getName())){
+						this.setNodeLogOpConstraint(LogOp.and(this.getNodeLogOpConstraint(),LogOp.or(var,LogOp.nor(var))));
+					}
+				}
+				for(BoolVarImpl var: this.getChocoVariablesList()){
+					if(parentFeatures.contains(var.getName()))
+						this.setNodeLogOpConstraint(LogOp.and(this.getNodeLogOpConstraint(),var));
+				}
+			}
+			for (int i=0; i<getNumChild(); i++) {	
+				getChild(i).formConstraintForEachNode(m);
+			}
+		}catch(Exception e){
+			System.out.println("Exception in formConstraint"+e);
+		}
+	}
+
+
+	public void FunctionDecl.formConstraintForEachNode(Model m) {
+		AppCond applicationCondition=this.getApplicationConditionField();
+		//LogOp nodeConstraint;
+		try{
+			if(applicationCondition!=null){
+				HashSet<String> includedFeatures= new HashSet<String>();
+				HashSet<String> parentFeatures= new HashSet<String>();
+				applicationCondition.getFeaturesIncluded(includedFeatures);
+				m.collectParents(includedFeatures,parentFeatures);
+				includedFeatures.addAll(parentFeatures);
+				//nodeConstraint=applicationCondition.getConstraint(this.getChocoVariablesList(),m);
+				this.setNodeLogOpConstraint(applicationCondition.getConstraint(this.getChocoVariablesList(),m));
+				for(BoolVarImpl var: this.getChocoVariablesList()){
+					if (!includedFeatures.contains(var.getName())){
+						this.setNodeLogOpConstraint(LogOp.and(this.getNodeLogOpConstraint(),LogOp.or(var,LogOp.nor(var))));
+					}
+				}
+				for(BoolVarImpl var: this.getChocoVariablesList()){
+					if(parentFeatures.contains(var.getName()))
+						this.setNodeLogOpConstraint(LogOp.and(this.getNodeLogOpConstraint(),var));
+				}
+			}
+			for (int i=0; i<getNumChild(); i++) {	
+				getChild(i).formConstraintForEachNode(m);
+			}
+		}catch(Exception e){
+			System.out.println("Exception in formConstraint"+e);
+		}
+	}
+
+	//Datatype DataTypeDecl,ParametricDataTypeDecl
+
+	public void DataTypeDecl.formConstraintForEachNode(Model m) {
+		AppCond applicationCondition=this.getApplicationConditionField();
+		//LogOp nodeConstraint;
+		try{
+			if(applicationCondition!=null){
+				HashSet<String> includedFeatures= new HashSet<String>();
+				HashSet<String> parentFeatures= new HashSet<String>();
+				applicationCondition.getFeaturesIncluded(includedFeatures);
+				m.collectParents(includedFeatures,parentFeatures);
+				includedFeatures.addAll(parentFeatures);
+				//nodeConstraint=applicationCondition.getConstraint(this.getChocoVariablesList(),m);
+				this.setNodeLogOpConstraint(applicationCondition.getConstraint(this.getChocoVariablesList(),m));
+				for(BoolVarImpl var: this.getChocoVariablesList()){
+					if (!includedFeatures.contains(var.getName())){
+						this.setNodeLogOpConstraint(LogOp.and(this.getNodeLogOpConstraint(),LogOp.or(var,LogOp.nor(var))));
+					}
+				}
+				for(BoolVarImpl var: this.getChocoVariablesList()){
+					if(parentFeatures.contains(var.getName()))
+						this.setNodeLogOpConstraint(LogOp.and(this.getNodeLogOpConstraint(),var));
+				}
+			}
+			for (int i=0; i<getNumChild(); i++) {	
+				getChild(i).formConstraintForEachNode(m);
+			}
+		}catch(Exception e){
+			System.out.println("Exception in formConstraint"+e);
+		}
+	}
+
+	public void ParametricDataTypeDecl.formConstraintForEachNode(Model m) {
+		AppCond applicationCondition=this.getApplicationConditionField();
+		//LogOp nodeConstraint;
+		try{
+			if(applicationCondition!=null){
+				HashSet<String> includedFeatures= new HashSet<String>();
+				HashSet<String> parentFeatures= new HashSet<String>();
+				applicationCondition.getFeaturesIncluded(includedFeatures);
+				m.collectParents(includedFeatures,parentFeatures);
+				includedFeatures.addAll(parentFeatures);
+				//nodeConstraint=applicationCondition.getConstraint(this.getChocoVariablesList(),m);
+				this.setNodeLogOpConstraint(applicationCondition.getConstraint(this.getChocoVariablesList(),m));
+				for(BoolVarImpl var: this.getChocoVariablesList()){
+					if (!includedFeatures.contains(var.getName())){
+						this.setNodeLogOpConstraint(LogOp.and(this.getNodeLogOpConstraint(),LogOp.or(var,LogOp.nor(var))));
+					}
+				}
+				for(BoolVarImpl var: this.getChocoVariablesList()){
+					if(parentFeatures.contains(var.getName()))
+						this.setNodeLogOpConstraint(LogOp.and(this.getNodeLogOpConstraint(),var));
+				}
+			}
+			for (int i=0; i<getNumChild(); i++) {	
+				getChild(i).formConstraintForEachNode(m);
+			}
+		}catch(Exception e){
+			System.out.println("Exception in formConstraint"+e);
+		}
+	}
+
+	public void Export.formConstraintForEachNode(Model m) {
+		AppCond applicationCondition=this.getApplicationConditionField();
+		//LogOp nodeConstraint;
+		try{
+			if(applicationCondition!=null){
+				HashSet<String> includedFeatures= new HashSet<String>();
+				HashSet<String> parentFeatures= new HashSet<String>();
+				applicationCondition.getFeaturesIncluded(includedFeatures);
+				m.collectParents(includedFeatures,parentFeatures);
+				includedFeatures.addAll(parentFeatures);
+				//nodeConstraint=applicationCondition.getConstraint(this.getChocoVariablesList(),m);
+				this.setNodeLogOpConstraint(applicationCondition.getConstraint(this.getChocoVariablesList(),m));
+				for(BoolVarImpl var: this.getChocoVariablesList()){
+					if (!includedFeatures.contains(var.getName())){
+						this.setNodeLogOpConstraint(LogOp.and(this.getNodeLogOpConstraint(),LogOp.or(var,LogOp.nor(var))));
+					}
+				}
+				for(BoolVarImpl var: this.getChocoVariablesList()){
+					if(parentFeatures.contains(var.getName()))
+						this.setNodeLogOpConstraint(LogOp.and(this.getNodeLogOpConstraint(),var));
+				}
+			}
+			for (int i=0; i<getNumChild(); i++) {	
+				getChild(i).formConstraintForEachNode(m);
+			}
+		}catch(Exception e){
+			System.out.println("Exception in formConstraint"+e);
+		}
+	}
+
+	public void Import.formConstraintForEachNode(Model m) {
+		AppCond applicationCondition=this.getApplicationConditionField();
+		//LogOp nodeConstraint;
+		try{
+			if(applicationCondition!=null){
+				HashSet<String> includedFeatures= new HashSet<String>();
+				HashSet<String> parentFeatures= new HashSet<String>();
+				applicationCondition.getFeaturesIncluded(includedFeatures);
+				m.collectParents(includedFeatures,parentFeatures);
+				includedFeatures.addAll(parentFeatures);
+				//nodeConstraint=applicationCondition.getConstraint(this.getChocoVariablesList(),m);
+				this.setNodeLogOpConstraint(applicationCondition.getConstraint(this.getChocoVariablesList(),m));
+				for(BoolVarImpl var: this.getChocoVariablesList()){
+					if (!includedFeatures.contains(var.getName())){
+						this.setNodeLogOpConstraint(LogOp.and(this.getNodeLogOpConstraint(),LogOp.or(var,LogOp.nor(var))));
+					}
+				}
+				for(BoolVarImpl var: this.getChocoVariablesList()){
+					if(parentFeatures.contains(var.getName()))
+						this.setNodeLogOpConstraint(LogOp.and(this.getNodeLogOpConstraint(),var));
+				}
+			}
+			for (int i=0; i<getNumChild(); i++) {	
+				getChild(i).formConstraintForEachNode(m);
+			}
+		}catch(Exception e){
+			System.out.println("Exception in formConstraint"+e);
+		}
+	}
+
+
+	//TypeSynDecl
+
+	public void TypeSynDecl.formConstraintForEachNode(Model m) {
+		AppCond applicationCondition=this.getApplicationConditionField();
+		//LogOp nodeConstraint;
+		try{
+			if(applicationCondition!=null){
+				HashSet<String> includedFeatures= new HashSet<String>();
+				HashSet<String> parentFeatures= new HashSet<String>();
+				applicationCondition.getFeaturesIncluded(includedFeatures);
+				m.collectParents(includedFeatures,parentFeatures);
+				includedFeatures.addAll(parentFeatures);
+				//nodeConstraint=applicationCondition.getConstraint(this.getChocoVariablesList(),m);
+				this.setNodeLogOpConstraint(applicationCondition.getConstraint(this.getChocoVariablesList(),m));
+				for(BoolVarImpl var: this.getChocoVariablesList()){
+					if (!includedFeatures.contains(var.getName())){
+						this.setNodeLogOpConstraint(LogOp.and(this.getNodeLogOpConstraint(),LogOp.or(var,LogOp.nor(var))));
+					}
+				}
+				for(BoolVarImpl var: this.getChocoVariablesList()){
+					if(parentFeatures.contains(var.getName()))
+						this.setNodeLogOpConstraint(LogOp.and(this.getNodeLogOpConstraint(),var));
+				}
+			}
+			for (int i=0; i<getNumChild(); i++) {	
+				getChild(i).formConstraintForEachNode(m);
+			}
+		}catch(Exception e){
+			System.out.println("Exception in formConstraint"+e);
+		}
+	}*/
+	
+	
+	public void MethodImpl.formConstraintForEachNode(Model m) {
+		AppCond applicationCondition=this.getApplicationConditionField();
+		//LogOp nodeConstraint;
+		
+		if((getMethodSig().getName()).equals("sayHello")){
+			System.out.println("getMethodSig() parent:: "+getParent().getParent());
+			System.out.println("getMethodSig():: "+getBlock());
+			System.out.println("getChocoVariablesList():: "+getChocoVariablesList());
+			System.out.println("applicationCondition:: "+applicationCondition);
+		}
+		try{
+			if(this.getChocoVariablesList()!=null)
+			{
+				if(applicationCondition!=null){
+					HashSet<String> includedFeatures= new HashSet<String>();
+					HashSet<String> parentFeatures= new HashSet<String>();
+					applicationCondition.getFeaturesIncluded(includedFeatures);
+					m.collectParents(includedFeatures,parentFeatures);
+					includedFeatures.addAll(parentFeatures);
+					//nodeConstraint=applicationCondition.getConstraint(this.getChocoVariablesList(),m);
+					this.setNodeLogOpConstraint(applicationCondition.getConstraint(this.getChocoVariablesList(),m));
+					for(BoolVarImpl var: this.getChocoVariablesList()){
+						if (!includedFeatures.contains(var.getName())){
+							LogOp nodeConstraint =this.getNodeLogOpConstraint();
+							this.setNodeLogOpConstraint(LogOp.and(nodeConstraint,LogOp.or(var.not(),var)));
+						}
+					}
+					for(BoolVarImpl var: this.getChocoVariablesList()){
+						if(parentFeatures.contains(var.getName()))
+							this.setNodeLogOpConstraint(LogOp.and(this.getNodeLogOpConstraint(),var));
+					}	
+					
+					if((getMethodSig().getName()).equals("sayHello")){
+						if(getParent().getParent() instanceof ClassDecl){
+							System.out.println("getNodeLogOpConstraint()::"+getNodeLogOpConstraint());
+						}
+					}
+				}
+			}else{
+				System.out.println("varaibleList is null for->"+this);
+			}
+			for (int i=0; i<getNumChild(); i++) {	
+				getChild(i).formConstraintForEachNode(m);
+			}
+		}catch(Exception e){
+			System.out.println("Exception in formConstraint"+e);
+		}
+	}
+
+
+	public void ASTNode.formConstraintForEachNode(Model m) {
+		AppCond applicationCondition=this.getApplicationConditionField();
+		//LogOp nodeConstraint;
+		try{
+			if(this.getChocoVariablesList()!=null)
+			{
+				if(applicationCondition!=null){
+					HashSet<String> includedFeatures= new HashSet<String>();
+					HashSet<String> parentFeatures= new HashSet<String>();
+					applicationCondition.getFeaturesIncluded(includedFeatures);
+					m.collectParents(includedFeatures,parentFeatures);
+					includedFeatures.addAll(parentFeatures);
+					//nodeConstraint=applicationCondition.getConstraint(this.getChocoVariablesList(),m);
+					this.setNodeLogOpConstraint(applicationCondition.getConstraint(this.getChocoVariablesList(),m));
+					for(BoolVarImpl var: this.getChocoVariablesList()){
+						if (!includedFeatures.contains(var.getName())){
+							this.setNodeLogOpConstraint(LogOp.and(this.getNodeLogOpConstraint(),LogOp.or(var,LogOp.nor(var))));
+						}
+					}
+					for(BoolVarImpl var: this.getChocoVariablesList()){
+						if(parentFeatures.contains(var.getName()))
+							this.setNodeLogOpConstraint(LogOp.and(this.getNodeLogOpConstraint(),var));
+					}	
+				}
+			}else{
+				System.out.println("varaibleList is null for->"+this);
+			}
+			for (int i=0; i<getNumChild(); i++) {	
+				getChild(i).formConstraintForEachNode(m);
+			}
+		}catch(Exception e){
+			System.err.println("Exception in formConstraint"+e);
+		}
+	}
+
+	/*public void ASTNode.formConstraintForEachNode(Model m) {
+		try{
+			for (int i=0; i<getNumChild(); i++) {
+				getChild(i).formConstraintForEachNode(m);
+			}
+		}catch(Exception e){
+			System.out.println("Exceptionssssss in formConstraint"+e);
+		}
+	}*/
+
+	public LogOp AppCondOr.getConstraint(ArrayList<BoolVarImpl> vars,Model m){
+		try{
+			LogOp left=this.getLeft().getConstraint(vars,m);
+			LogOp right=this.getRight().getConstraint(vars,m);
+			if(left!=null && right!=null)
+				return LogOp.or(left,right);
+			else
+				System.err.println("Error creating AppCondOr");
+		}catch(Exception e){
+			System.err.println("Error creating AppCondOr");
+		}
+		return null;
+	}
+	public LogOp AppCondAnd.getConstraint(ArrayList<BoolVarImpl> vars,Model m){
+		try{
+			LogOp left =this.getLeft().getConstraint(vars,m);
+			LogOp right=this.getRight().getConstraint(vars,m);
+			if(left!=null && right!=null){
+				return LogOp.and(left,right);
+			}else{
+				System.err.println("Error creating AppCondAnd");
+			}
+
+		}catch(Exception e){
+			System.err.println("Error creating AppCondAnd");
+		}
+		return null;
+	}
+	public LogOp AppCondNot.getConstraint(ArrayList<BoolVarImpl> vars,Model m){
+		try{
+			LogOp logOpNode=this.getAppCond().getConstraint(vars,m);
+			if(logOpNode!=null)
+				return LogOp.nor(logOpNode);
+			//return null;
+		}catch(Exception e){
+			System.err.println("Error creating AppCondNot");
+		}
+		return null;
+	}
+	public LogOp AppCondFeature.getConstraint(ArrayList<BoolVarImpl> vars,Model m){
+		try{
+			for(BoolVarImpl var: vars){
+				if ((this.getName()).equals(var.getName())){
+					return LogOp.and(var);
+				}
+			}
+			System.err.println("Feature "+this.getName()+" is not defined correctly");
+			return null;
+		}catch(Exception e){
+			System.err.println("Error creating AppCondFeature");
+			System.exit(1);
+		}
+		return null;
+	}
+
+	public LogOp AppCond.getConstraint(ArrayList<BoolVarImpl> vars,Model m){
+		System.out.println("Never Runs!!");
+		return null;
+	}
+
+}

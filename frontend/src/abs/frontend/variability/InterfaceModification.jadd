@@ -1,0 +1,23 @@
+aspect InterfaceModification{
+	abstract ASTNode MethodSigModifier.findExistingInterfaceModificationList(InterfaceDecl interfaceDecl);
+
+	public ASTNode AddMethodSigModifier.findExistingInterfaceModificationList(InterfaceDecl interfaceDecl){
+		try{
+			this.setApplicationConditionField(deltaApplicationConditionAttribute());
+			this.updateApplicationConditionFieldOfChild();
+			MethodSig sig = getMethodSig().treeCopyNoTransform();
+			sig.setApplicationConditionField(deltaApplicationConditionAttribute());
+			sig.updateApplicationConditionFieldOfChild();
+			sig.setFileName(getMethodSig().getFileName());
+			interfaceDecl.addBody(sig);
+			return null;
+		}catch(Exception e){
+			System.out.println("Exception in InterfaceModification.MethodSigModifier:"+e);
+		}
+		return null;
+	}
+
+	public ASTNode RemoveMethodSigModifier.findExistingInterfaceModificationList(InterfaceDecl interfaceDecl){
+		return this;
+	}
+}

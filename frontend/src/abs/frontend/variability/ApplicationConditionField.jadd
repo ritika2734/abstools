@@ -1,0 +1,29 @@
+aspect ApplicationConditionField{
+	private AppCond ASTNode.applicationConditionField;
+
+	public AppCond ASTNode.getApplicationConditionField(){
+		return this.applicationConditionField;
+	}
+	public void ASTNode.setApplicationConditionField(AppCond appCond){
+		this.applicationConditionField=appCond;
+	}
+
+}
+
+aspect UpdateApplicationConditionFieldOfChild{
+
+	public void ASTNode.updateApplicationConditionFieldOfChild() {
+		try{
+			AppCond applicationConditionFieldParent= this.getApplicationConditionField();
+			if(applicationConditionFieldParent!=null && getParent()!=null){
+				for (int i = 0; i < getNumChild(); i++) {
+					getChild(i).setApplicationConditionField(applicationConditionFieldParent);
+					getChild(i).updateApplicationConditionFieldOfChild();
+				}	
+			}
+		}catch(Exception e){
+			System.err.println("Error in updateApplicationConditionFieldOfChild "+e);
+			System.exit(1);
+		}
+	}
+} 

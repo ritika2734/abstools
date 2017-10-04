@@ -1,0 +1,19 @@
+import abs.frontend.ast.*;
+aspect DeltaApplicationConditionAttribute{
+
+	inh AppCond Modifier.deltaApplicationConditionAttribute(); 
+	inh AppCond ModuleModifier.deltaApplicationConditionAttribute();
+	inh AppCond MethodSigModifier.deltaApplicationConditionAttribute();
+	inh AppCond MethodModifier.deltaApplicationConditionAttribute();
+	inh AppCond Modifier.deltaApplicationConditionAttribute();
+	//inh AppCond DeltaClassParam.deltaApplicationConditionAttribute();
+	//inh AppCond DeltaFieldParam.deltaApplicationConditionAttribute();
+	
+	eq Model.getCompilationUnit(int index).deltaApplicationConditionAttribute(){
+		return null;
+	}
+	eq DeltaDecl.getModuleModifier(int index).deltaApplicationConditionAttribute() {
+		return lookupForFeatureAssociatedWithDeltaName();
+	}
+
+}

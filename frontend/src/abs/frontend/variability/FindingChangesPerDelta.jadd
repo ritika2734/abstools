@@ -1,0 +1,335 @@
+aspect FindingChangesPerDelta{
+	/**
+	 * Traverse through all the DeltaDecl nodes and apply the necessary changes in the moduleDecl
+	 * 
+	 * @param  pl - productline 
+	 * @param  sortedDeltaidsName - ArrayList of sorted delta names
+	 *
+	 */
+	public void Model.variabilityAST(ProductLine pl,ArrayList<String> sortedDeltaidsName,ArrayList<DeltaDecl> deltas) throws DeltaModellingException{
+		try{
+
+
+			// ArrayList containing map of modified and removed nodes with their parent node.
+			ArrayList<Map<ASTNode, ASTNode>> allDeltasModificationList = new ArrayList<Map<ASTNode, ASTNode>>();
+			Set<String> deltaIds = new HashSet<String>(); // Set of delta ids
+			// Traverse deltaDecl and store their name 
+			for(DeltaDecl deltaDecl: getDeltaDecls()){
+				deltaIds.add(deltaDecl.getName());
+			}
+			java.util.List<String> sorted_deltaids = pl.sortDeltas(deltaIds); //sorted list od delta names
+			sortedDeltaidsName.addAll(sorted_deltaids);
+
+			// Store the deltDecl in deltas ArrayList
+			for (String deltaid : sorted_deltaids)
+				deltas.add(getDeltaDeclsMap().get(deltaid));
+
+			// Apply changes as per the application order
+			for(DeltaDecl deltaDecl: deltas){
+				ArrayList<Map<ASTNode, ASTNode>> deltaDeclModificationList = new ArrayList<Map<ASTNode, ASTNode>>();
+				//Finding changes in deltaDecl and adding in allDeltasModificationList
+				deltaDecl.getChangesInAST(deltaDeclModificationList,this);
+				if(deltaDeclModificationList.size()>0){
+					allDeltasModificationList.addAll(deltaDeclModificationList);
+				}
+			}
+
+			// Traversing all the modified and removed nodes
+			for(Map<ASTNode, ASTNode> deltasModificationMap: allDeltasModificationList){
+				for (Map.Entry<ASTNode, ASTNode> entry : deltasModificationMap.entrySet()) {
+					entry.getKey().applyChangesTo(entry.getValue());
+				}	
+			}
+		}catch(Exception e){
+			System.err.println("Exception during variability tree formation"+e);
+			System.exit(1);
+		}
+	}
+
+	/*
+	 *  This function gets changes in the map for each DeltaDecl
+	 * @param  deltaSpecificModificationList - ArrayList of Map of AST nodes
+	 * @param m - Model
+	 * 
+	 * */
+	public void DeltaDecl.getChangesInAST(ArrayList<Map<ASTNode, ASTNode>> deltaSpecificModificationList,Model m){
+		Map<ASTNode, ASTNode> moduleModifierMap = new HashMap<ASTNode, ASTNode>();
+		Map<ASTNode, ASTNode> classModifyMap = new HashMap<ASTNode, ASTNode>();
+
+		// Traverse all ModuleModifiers in DeltaDecl 
+		for(ModuleModifier moduleModifier: getModuleModifiers()){
+			moduleModifier.getModuleSpecificChanges(moduleModifierMap,m);
+		}
+
+		// Only Modification Nodes
+		for(Map.Entry<ASTNode, ASTNode> entry : moduleModifierMap.entrySet()) {
+			entry.getKey().addModificationsNode(entry.getValue(),m,classModifyMap);
+		}
+		moduleModifierMap.putAll(classModifyMap);
+		deltaSpecificModificationList.add(moduleModifierMap);
+	}
+
+	abstract void ModuleModifier.getModuleSpecificChanges(Map<ASTNode, ASTNode> moduleModifierMap,Model m);
+	abstract public void FunctionalModifier.getModuleSpecificChanges(Map<ASTNode, ASTNode> moduleModifierMap,Model m);
+	abstract public void NamespaceModifier.getModuleSpecificChanges(Map<ASTNode, ASTNode> moduleModifierMap,Model m);
+	abstract void OOModifier.getModuleSpecificChanges(Map<ASTNode, ASTNode> moduleModifierMap,Model m);
+
+	/*
+	 * Add the new class with the application condition 
+	 * @param moduleModifierMap - store the node and it's parent
+	 * */
+	public void AddClassModifier.getModuleSpecificChanges(Map<ASTNode, ASTNode> moduleModifierMap,Model m){
+		try{
+			// parent module of class
+			ModuleDecl module = findModule();
+			if(module==null){
+				System.err.println("Unable to find the module");
+			}else{
+				// Set and update applicationConditionField of AddClassModifier node
+				this.setApplicationConditionField(deltaApplicationConditionAttribute());
+				// Update the applicationConditionField of the child
+				this.updateApplicationConditionFieldOfChild();
+				ClassDecl cls = getClassDecl().treeCopyNoTransform(); // get the classDecl
+				cls.setFileName(getClassDecl().getFileName()); // set the fileName of classDecl
+				cls.setName(getSimpleName()); // set the name of the class 
+				cls.setApplicationConditionField(deltaApplicationConditionAttribute()); // set applicationConditionField of ClassDecl
+				cls.updateApplicationConditionFieldOfChild(); // update applicationConditionField of ClassDecl children
+				module.getDecls().addChild(cls); // Add the node to the module
+			}
+		}catch(Exception e){
+			System.out.println("Exception in FindingChanges.AddClassModifier:"+e);
+		}
+	}
+
+	/*
+	 * Add the removed class with the application condition in map 
+	 * @param removeClassMap - store the removed class and parent module in map
+	 * @param m - model
+	 * 
+	 * */
+
+	public void RemoveClassModifier.getModuleSpecificChanges(Map<ASTNode, ASTNode> removeClassMap,Model m){
+		try{
+			removeClassMap.put(this,getModule()); // Adds the removed node and it's parent in map
+		}catch(Exception e){
+			System.out.println("Exception in FindingChanges.RemoveClassModifier:"+e);
+		}
+
+	}
+
+	/*
+	 * Add the modified class with the application condition in map 
+	 * @param moduleModifierMap - store the modified class and parent module in map
+	 * 
+	 * */
+
+	public void ModifyClassModifier.getModuleSpecificChanges(Map<ASTNode, ASTNode> modifyClassMap,Model m){
+		try{
+			ModuleDecl module=findModule();
+			ClassDecl cls= findClass();
+			if(module==null)
+				System.err.println("Module does not exist");
+			if(cls==null)
+				System.err.println("Class does not exist");
+			modifyClassMap.put(this,module);
+		}catch(Exception e){
+			System.out.println("Exception in FindingChanges.ModifyClassModifier:"+e);
+		}
+	}
+
+
+	// Interface Related
+	/*
+	 * This method adds a new interface into the module with application condition
+	 * @param - addInterfaceMap
+	 * @param - m (Model)
+	 * 
+	 * */
+	public void AddInterfaceModifier.getModuleSpecificChanges(Map<ASTNode, ASTNode> addInterfaceMap,Model m){
+		try{
+
+			ModuleDecl module = findModule(); // Find parent of InterfaceDecl
+			assert module.lookup(new KindedName(Kind.TYPE_DECL, getSimpleName())).isUnknown();
+			//setApplicationConditionField(deltaApplicationConditionAttribute()); // set applicationConditionField of node
+			//updateApplicationConditionFieldOfChild();// update applicationConditionField of children
+			InterfaceDecl decl = getInterfaceDecl().treeCopyNoTransform();
+			decl.setFileName(getInterfaceDecl().getFileName()); //set interface fileName
+			decl.setName(getSimpleName());//set interface name
+			decl.setApplicationConditionField(deltaApplicationConditionAttribute());// set applicationConditionField of node
+			decl.updateApplicationConditionFieldOfChild();// update applicationConditionField of node
+			module.getDecls().addChild(decl);//add node to the module
+		}catch(Exception e){
+			System.out.println("Exception in FindingChanges.AddInterfaceModifier:"+e);
+		}
+	}
+
+	/*
+	 * This method store the removed interface node in the map
+	 * 
+	 * @param - removeInterfaceMap
+	 * @param - m
+	 * 
+	 * */
+	public void RemoveInterfaceModifier.getModuleSpecificChanges(Map<ASTNode, ASTNode> removeInterfaceMap,Model m){
+		try{
+			removeInterfaceMap.put(this,getModule());
+		}catch(Exception e){
+			System.out.println("Exception in FindingChanges.RemoveInterfaceModifier:"+e);
+		}
+	}
+
+	/*
+	 * This method store the modified interface node in the map
+	 * 
+	 * @param - modifyInterfaceMap
+	 * @param - m
+	 * 
+	 * */
+	public void ModifyInterfaceModifier.getModuleSpecificChanges(Map<ASTNode, ASTNode> modifyInterfaceMap,Model m){
+		// send node to update application condition and add the node
+		try{
+			InterfaceDecl interfaceDecl =getInterfaceDecl();
+			ASTNode modifiedAstInterfaceNode = new ASTNode();
+			for(MethodSigModifier methodSigModifier: this.getMethodSigModifiers()){
+				modifiedAstInterfaceNode=methodSigModifier.findExistingInterfaceModificationList(interfaceDecl);
+				if(modifiedAstInterfaceNode!=null)
+					modifyInterfaceMap.put(modifiedAstInterfaceNode,interfaceDecl);
+			}
+		}catch(Exception e){
+			System.out.println("Exception in FindingChanges.ModifyInterfaceModifier:"+e);
+		}
+	}
+
+
+	// NamespaceModifier i.e. Import and Export
+	/*
+	 * This method adds the import to the module
+	 * 
+	 * @param - addImportMap
+	 * @param - m
+	 * 
+	 * */
+	public void AddImportModifier.getModuleSpecificChanges(Map<ASTNode, ASTNode> addImportMap,Model m){
+		try{
+			this.setApplicationConditionField(deltaApplicationConditionAttribute());
+			this.updateApplicationConditionFieldOfChild();
+			apply();
+		}catch(Exception e){
+			System.err.println("Error in adding Import");
+		}
+	}
+
+	/*
+	 * This method adds the export to the module
+	 * 
+	 * @param - addExportMap
+	 * @param - m
+	 * 
+	 * */
+	public void AddExportModifier.getModuleSpecificChanges(Map<ASTNode, ASTNode> addExportMap,Model m){
+		this.setApplicationConditionField(deltaApplicationConditionAttribute());
+		this.updateApplicationConditionFieldOfChild();
+		apply();
+	}
+
+	//FunctionalModifier i.e. TypeSynModifier,DataTypeModifier,FunctionModifier
+
+	/*
+	 * This method adds the TypeSyn to the module
+	 * 
+	 * @param - typeSynMap
+	 * @param - m
+	 * 
+	 * */
+	public void AddTypeSynModifier.getModuleSpecificChanges(Map<ASTNode, ASTNode> typeSynMap,Model m){
+		this.setApplicationConditionField(deltaApplicationConditionAttribute());// sets the applicationConditionField
+		this.updateApplicationConditionFieldOfChild();// updates the applicationConditionField
+		ModuleDecl module = findModule();// find the parent module
+		TypeSynDecl type = getTypeSynDecl().treeCopyNoTransform();// get TypeSynDecl
+		type.setAddedBy(deltaName());// set the addedBy field
+		type.setFileName(getTypeSynDecl().getFileName());// set the filename
+		module.getDecls().addChild(type);// add the child to the module
+	}
+
+	/*
+	 * This method adds the modify TypeSyn to the map
+	 * 
+	 * @param - moduleModifierMap
+	 * @param - m
+	 * 
+	 * */
+	public void ModifyTypeSynModifier.getModuleSpecificChanges(Map<ASTNode, ASTNode> moduleModifierMap,Model m){
+		/*this.setApplicationConditionField(deltaApplicationConditionAttribute());
+		this.updateApplicationConditionFieldOfChild();
+		ModuleDecl module = findModule();
+		TypeSynDecl type = getTypeSynDecl().treeCopyNoTransform();
+		type.setFileName(getTypeSynDecl().getFileName());
+		module.getDecls().addChild(type);*/
+		moduleModifierMap.put(this,findModule());
+	}
+
+	/*
+	 * This method adds the new DataType to the module
+	 * 
+	 * @param - moduleModifierMap
+	 * @param - m
+	 * 
+	 * */
+	public void AddDataTypeModifier.getModuleSpecificChanges(Map<ASTNode, ASTNode> moduleModifierMap,Model m){
+		try{
+			this.setApplicationConditionField(deltaApplicationConditionAttribute());// sets the applicationConditionField
+			this.updateApplicationConditionFieldOfChild();// updates the applicationConditionField of children
+			ModuleDecl module = findModule();// find the parent module
+
+			DataTypeDecl dtd = this.getDataTypeDecl().treeCopyNoTransform();// get DataTypeDecl
+			dtd.setFileName(getDataTypeDecl().getFileName());// set the filename
+			dtd.setAddedBy(deltaName());// set the addedBy field value
+			module.getDecls().addChild(dtd);// add the decl to the module
+			//Check importants
+			for (FunctionDecl fd : new ASTPreProcessor().createSelectorFunctionsForDeltaApplication(dtd)) {
+				fd.setApplicationConditionField(deltaApplicationConditionAttribute());
+				fd.updateApplicationConditionFieldOfChild();
+				fd.chocoModelFormation(m.features());
+				module.getDecls().addChild(fd);
+			}
+		}catch(Exception e){
+			System.out.println("Exception in AddDataTypeModifier is:"+e);
+		}
+	}
+
+	/*
+	 * This method adds the modify DataType to the map
+	 * 
+	 * @param - moduleModifierMap
+	 * @param - m
+	 * 
+	 * */
+	public void ModifyDataTypeModifier.getModuleSpecificChanges(Map<ASTNode, ASTNode> moduleModifierMap,Model m){
+		/*System.out.println("Inside ModifyDataTypeModifier Modifier"+this);
+		this.setApplicationConditionField(deltaApplicationConditionAttribute());
+		this.updateApplicationConditionFieldOfChild();
+		ModuleDecl module = findModule();
+		DataTypeDecl dtd = this.getDataTypeDecl().treeCopyNoTransform();
+		dtd.setFileName(getDataTypeDecl().getFileName());
+		module.getDecls().addChild(dtd);
+
+		//Check importants
+		/*for (FunctionDecl fd : new ASTPreProcessor().createSelectorFunctionsForDeltaApplication(dtd)) {
+            module.getDecls().addChild(fd);
+        }*/
+		moduleModifierMap.put(this,findModule());
+	}
+
+	/*
+	 * This method adds the Function to the module
+	 * 
+	 * @param - moduleModifierMap
+	 * @param - m
+	 * 
+	 * */
+	public void AddFunctionModifier.getModuleSpecificChanges(Map<ASTNode, ASTNode> moduleModifierMap,Model m){
+		this.setApplicationConditionField(deltaApplicationConditionAttribute());
+		this.updateApplicationConditionFieldOfChild();
+		apply();
+	}
+}

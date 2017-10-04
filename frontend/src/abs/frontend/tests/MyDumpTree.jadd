@@ -65,8 +65,9 @@ aspect MyDumpTree
 		// The node information followed by the prefixes.
 		stream.print(clsName + ":[");		
 		printInfo(stream);
-		stream.println("]");		
-
+		stream.print("]::"+getBooleanValue()+"::");
+		//stream.println(getBooleanValue());
+		stream.println(getNodeLogOpConstraint());	
 
 		// Update the pattern.
 		// If the current node is the last child of this level, then all its children

@@ -1,0 +1,232 @@
+aspect TraverseToRemoveNodes{
+	/*
+	 * This function traverse all the children nodes and remove the nodes with booleanValue "false"
+	 * 
+	 * */
+	public void Model.traverseToRemoveNodes(Model model,ArrayList<String> sortedDeltasIds){
+		try{
+			for(CompilationUnit c: model.getCompilationUnits()){
+				for(ModuleDecl moduleDecl: c.getModuleDecls()){
+					System.out.println("ModuleDecl inside traverse-->"+moduleDecl.getName());
+					System.out.println("sortedDeltasIds"+sortedDeltasIds);
+					moduleDecl.traverseToRemoveNodes(sortedDeltasIds);
+				}
+			}
+			//sortedDeltasIds.remove  and null
+		}catch(Exception e){
+			System.err.println("Exception in Model.traverseToRemoveNodes ");
+		}
+	}
+
+
+	public void ModuleDecl.traverseToRemoveNodes(java.util.ArrayList deltaIds){
+		try{
+			ArrayList<Decl> nodesToRemoveMap  = new ArrayList<Decl>();
+			for(Decl d: getDecls()){
+				d.traverseToRemoveNodes(nodesToRemoveMap,deltaIds);
+			}
+			for (Decl decl : nodesToRemoveMap) {
+				this.getDecls().removeChild(this.getDecls().getIndexOfChild(decl));
+			}
+
+			ArrayList<Export> nodesOfExportsToRemoveMap  = new ArrayList<Export>();
+			for(Export e: getExports()){
+				e.traverseToRemoveNodes(nodesOfExportsToRemoveMap,deltaIds);
+			}
+			for (Export e : nodesOfExportsToRemoveMap) {
+				this.getExports().removeChild(this.getExports().getIndexOfChild(e));
+			}
+
+			ArrayList<Import> nodesOfImportsToRemoveMap  = new ArrayList<Import>();
+			for(Import i: getImports()){
+				i.traverseToRemoveNodes(nodesOfImportsToRemoveMap,deltaIds);
+			}
+			for (Import i : nodesOfImportsToRemoveMap) {
+				this.getImports().removeChild(this.getImports().getIndexOfChild(i));
+			}
+		}catch(Exception e){
+			System.out.println("Exception in traversing ModuleDecl"+e);
+			System.err.println("Exception in traversing ModuleDecl"+e);
+		}
+	}
+
+	abstract void Decl.traverseToRemoveNodes(ArrayList nodesToRemoveList,java.util.ArrayList deltaIds);
+
+	abstract void BehaviorDecl.traverseToRemoveNodes(ArrayList nodesToRemoveList,java.util.ArrayList deltaIds);
+
+	abstract void TypeDecl.traverseToRemoveNodes(ArrayList nodesToRemoveList,java.util.ArrayList deltaIds);
+
+	public void TraitDecl.traverseToRemoveNodes(ArrayList nodesToRemoveList,java.util.ArrayList deltaIds){}
+
+	public void UnknownDecl.traverseToRemoveNodes(ArrayList nodesToRemoveList,java.util.ArrayList deltaIds){}
+
+	public void Export.traverseToRemoveNodes(ArrayList nodesToRemoveList,java.util.ArrayList deltaIds){
+		if(!getBooleanValue())
+			nodesToRemoveList.add(this);
+	}
+
+	public void Import.traverseToRemoveNodes(ArrayList nodesToRemoveList,java.util.ArrayList deltaIds){
+		if(!getBooleanValue())
+			nodesToRemoveList.add(this);
+	}
+
+
+	public void ClassDecl.traverseToRemoveNodes(ArrayList nodesToRemoveList,java.util.ArrayList deltaIds){
+		try{
+			ClassDecl cls=this;
+			ArrayList<MethodImpl> methodsToRemoveInClassList = new ArrayList<MethodImpl>();
+			ArrayList<FieldDecl> fieldsToRemoveInClassList = new ArrayList<FieldDecl>();
+			ArrayList<InterfaceTypeUse> interfacesToRemoveInClassList = new ArrayList<InterfaceTypeUse>();
+			if(this.getBooleanValue()){
+				// Traverse further
+				for(InterfaceTypeUse interfaceTypeUse : getImplementedInterfaceUses()){
+					// if false remove
+					if(!interfaceTypeUse.getBooleanValue()){
+						interfaceTypeUse.traverseToRemoveNodes(interfacesToRemoveInClassList);
+					}
+
+				}
+
+				for(MethodImpl methodImpl : getMethods()){
+					// if false remove
+					if(!methodImpl.getBooleanValue()){
+						methodImpl.traverseToRemoveNodes(methodsToRemoveInClassList);
+
+					}else{
+						if(methodImpl.getAddedBy()!=null){
+							if(!deltaIds.contains(methodImpl.getAddedBy())){
+								System.err.println(methodImpl.getAddedBy()+" not present in "+deltaIds);
+								System.err.println("Delta wants to add method"+methodImpl.getMethodSig().getName()+" which is not present in the class");
+								//System.exit(1);
+							}
+						}
+					}
+				}
+				for(FieldDecl fieldDecl : getFields()){
+					// if false remove
+					if(!fieldDecl.getBooleanValue()){
+						fieldDecl.traverseToRemoveNodes(fieldsToRemoveInClassList);
+					}
+				}
+
+			}else{
+				nodesToRemoveList.add(this);
+			}
+
+			for(InterfaceTypeUse interfaceTypeUse : interfacesToRemoveInClassList){
+				this.getImplementedInterfaceUses().removeChild(this.getImplementedInterfaceUses().getIndexOfChild(interfaceTypeUse));
+			}
+
+			for(MethodImpl methodImpl: methodsToRemoveInClassList){
+				System.out.println(this.getName()+" methodsToRemoveInClassList are::"+methodsToRemoveInClassList);
+				this.getMethods().removeChild(this.getMethods().getIndexOfChild(methodImpl));
+			}
+
+			for(FieldDecl fieldDecl: fieldsToRemoveInClassList){
+				this.getFields().removeChild(this.getFields().getIndexOfChild(fieldDecl));
+			}
+
+			//Resolving original calls in the methods
+			ArrayList<MethodImpl> originalMethodsListInClass = new ArrayList<MethodImpl>();
+
+			for(MethodImpl methodImpl: getMethods()){
+				methodImpl.checkForOriginalCall(deltaIds,originalMethodsListInClass);
+			}
+			for(MethodImpl methodImpl : originalMethodsListInClass){
+				//i= getNumMethod();
+				//getMethods().setChild(methodImpl, i);
+				System.out.println(methodImpl.getMethodSig().getName()+"Adding method"+methodImpl.getBlock());
+				cls.addMethod(methodImpl);
+			}
+		}catch(Exception e){
+			System.out.println("Exception in ClassDecl.traverseToRemoveNodes"+e);
+		}
+
+	}
+
+
+	public void InterfaceTypeUse.traverseToRemoveNodes(ArrayList nodeToRemoveInClassList){
+		nodeToRemoveInClassList.add(this);
+	}
+
+	public void MethodImpl.traverseToRemoveNodes(ArrayList nodeToRemoveInClassList){
+		nodeToRemoveInClassList.add(this);
+	}
+
+	public void FieldDecl.traverseToRemoveNodes(ArrayList nodeToRemoveInClassList){
+		nodeToRemoveInClassList.add(this);
+	}
+
+	//Interface
+	public void InterfaceDecl.traverseToRemoveNodes(ArrayList nodesToRemoveList,java.util.ArrayList deltaIds){
+		ArrayList<MethodSig> methodToRemoveInInterfaceList = new ArrayList<MethodSig>();
+		if(this.getBooleanValue()){
+			// Traverse further
+			for(MethodSig methodSig : getBodys()){
+				// if false remove
+				if(!methodSig.getBooleanValue())
+					methodSig.traverseToRemoveNodes(methodToRemoveInInterfaceList);
+			}
+		}else{
+			//Remove interface
+			nodesToRemoveList.add(this);
+		}
+
+		for(MethodSig methodSig:methodToRemoveInInterfaceList){
+			this.getBodys().removeChild(this.getBodys().getIndexOfChild(methodSig));
+		}
+	}
+
+	public void MethodSig.traverseToRemoveNodes(ArrayList methodToRemoveInInterfaceList){
+		methodToRemoveInInterfaceList.add(this);
+	}
+
+	public void FunctionDecl.traverseToRemoveNodes(ArrayList nodesToRemoveList,java.util.ArrayList deltaIds){
+		if(!getBooleanValue())
+			nodesToRemoveList.add(this);
+	}
+
+	public void ParametricFunctionDecl.traverseToRemoveNodes(ArrayList nodesToRemoveList,java.util.ArrayList deltaIds){
+		if(!getBooleanValue())
+			nodesToRemoveList.add(this);
+	}
+
+	public void DataTypeDecl.traverseToRemoveNodes(ArrayList nodesToRemoveList,java.util.ArrayList deltaIds){
+		if(!getBooleanValue()){
+			nodesToRemoveList.add(this);
+		}else{
+			if(getAddedBy()!="core" && !deltaIds.contains(getAddedBy())){
+				System.err.println("Delta wants to add datatype"+this.getName()+" which is not present in the module");
+				System.exit(1);
+			}
+		}
+
+	}
+
+	public void ParametricDataTypeDecl.traverseToRemoveNodes(ArrayList nodesToRemoveList,java.util.ArrayList deltaIds){
+		if(!getBooleanValue()){
+			nodesToRemoveList.add(this);
+		}else{
+			if(getAddedBy()!=null && !deltaIds.contains(getAddedBy())){
+				System.err.println("Delta wants to add datatype "+this.getName()+" which is not present in the module");
+				System.exit(1);
+			}
+		}
+	}
+
+	public void DataConstructor.traverseToRemoveNodes(ArrayList nodesToRemoveList,java.util.ArrayList deltaIds){}
+
+	public void TypeSynDecl.traverseToRemoveNodes(ArrayList nodesToRemoveList,java.util.ArrayList deltaIds){
+		if(!getBooleanValue()){
+			nodesToRemoveList.add(this);
+		}else{
+			if(getAddedBy()!=null && !deltaIds.contains(getAddedBy())){
+				System.err.println("Delta wants to add type "+this.getName()+" which is not present in the module");
+				System.exit(1);
+			}
+		}
+	}
+	public void ExceptionDecl.traverseToRemoveNodes(ArrayList nodesToRemoveList,java.util.ArrayList deltaIds){}	
+	public void TypeParameterDecl.traverseToRemoveNodes(ArrayList nodesToRemoveList,java.util.ArrayList deltaIds){}
+
+}

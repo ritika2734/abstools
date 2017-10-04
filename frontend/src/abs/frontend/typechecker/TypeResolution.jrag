@@ -75,7 +75,7 @@ aspect TypeResolution {
         return ! getVisibleNames().getAllNames(name).isEmpty();
     }
 
-    syn lazy Collection<ModuleDecl> Model.getModuleDecls() {
+    syn Collection<ModuleDecl> Model.getModuleDecls() {
         ArrayList<ModuleDecl> res = new ArrayList<ModuleDecl>();
         for (CompilationUnit u : getCompilationUnits()) {
             for (ModuleDecl mdecl : u.getModuleDecls()) {
@@ -85,7 +85,7 @@ aspect TypeResolution {
         return res;
     }
 
-    syn lazy Collection<Decl> Model.getDecls() {
+    syn Collection<Decl> Model.getDecls() {
         ArrayList<Decl> res = new ArrayList<Decl>();
         for (ModuleDecl mdecl : getModuleDecls()) {
             for (Decl d : mdecl.getDecls()) {

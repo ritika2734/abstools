@@ -1,0 +1,200 @@
+aspect ResolveOriginalCallsInMethods{
+	private String MethodImpl.methodDeltaName = new String();
+	private HashMap<String, MethodImpl> MethodImpl.methodsMap=new HashMap<String, MethodImpl>();
+	private Stack<String> MethodImpl.methodsStack = new Stack<String>();
+
+	public String MethodImpl.getMethodDeltaName(){
+		return this.methodDeltaName;
+	}
+
+	public void MethodImpl.setMethodDeltaName(String value){
+		this.methodDeltaName=value;
+	}
+
+	public HashMap<String, MethodImpl> MethodImpl.getMethodsMap(){
+		return this.methodsMap;
+	}
+
+	public void MethodImpl.setMethodsMap(String value,MethodImpl method){
+		this.methodsMap.put(value,method);
+	}
+
+	public Stack<String> MethodImpl.getMethodsStack(){
+		return this.methodsStack;
+	}
+
+	public void MethodImpl.setMethodsStack(String value){
+		this.methodsStack.push(value);
+	}
+
+
+
+
+	public void MethodImpl.getOriginalCallStack(ClassDecl cls){
+		try{
+			MethodSig mysig = getMethodSig();
+			for (MethodImpl classMethod: cls.getMethods()) {
+				if((classMethod.getMethodSig().getName()).equals(getMethodSig().getName())){
+					if(classMethod.getApplicationConditionField()==null){
+						this.setMethodsMap("core",classMethod);
+						this.setMethodsStack("core");
+					}else{
+						this.setMethodsMap(classMethod.getMethodDeltaName(),classMethod);
+						this.setMethodsStack(classMethod.getMethodDeltaName());
+					}
+				}
+			}
+		}catch(Exception e){
+			System.out.println("Exception in getOriginalCallStack"+e);
+			System.err.println("Exception in getOriginalCallStack"+e);
+		}
+	}
+
+	public void MethodImpl.checkForOriginalCall(java.util.List deltaIds,ArrayList originalMethodsListInClass){
+		try{
+			if(getMethodDeltaName()!=null){
+				String nameOfDelta=getMethodDeltaName();
+				ArrayList<OriginalCall> list = new ArrayList<>();
+
+				for(Stmt stmt:getBlock().getStmts()){
+					collectOrignalMethods(list, stmt);
+				}
+				if(list.size()>=1){
+					int i=0;
+					i=deltaIds.indexOf(nameOfDelta)-1;
+					if(i>=0){
+						//If id is present in stack get corresponding methodImpl else pop from stack till this id is found.
+						if((deltaIds.get(i)).equals(getMethodsStack().peek())){
+							//Get method Impl and check for original call again
+							MethodImpl originalMethodToApply = getMethodsMap().get(getMethodsStack().peek()).treeCopyNoTransform();
+							//getMethodsStack().pop();
+							originalMethodToApply.checkForFurtherOriginalCall(deltaIds,originalMethodsListInClass,getMethodsStack(),i,getMethodsMap(),this,list);
+
+						}else{
+							if((getMethodsStack().peek()).equals("core")){
+								MethodImpl originalMethodToApply = getMethodsMap().get("core");
+								//Renaming it before adding
+								originalMethodToApply.checkForFurtherOriginalCall(deltaIds,originalMethodsListInClass,getMethodsStack(),i,getMethodsMap(),this,list);
+								//break;
+							}else{
+								while(!(getMethodsStack().peek()).equals(deltaIds.get(i))){
+									if((getMethodsStack().peek()).equals("core")){
+										MethodImpl originalMethodToApply = getMethodsMap().get("core").treeCopyNoTransform();
+										//Renaming it before adding
+										originalMethodToApply.checkForFurtherOriginalCall(deltaIds,originalMethodsListInClass,getMethodsStack(),i,getMethodsMap(),this,list);
+										break;
+									}else{
+										String removed=getMethodsStack().pop();
+									}
+								}
+								if(!(getMethodsStack().peek()).equals("core"))
+									getMethodsMap().get(getMethodsStack().peek()).checkForFurtherOriginalCall(deltaIds,originalMethodsListInClass,getMethodsStack(),i,getMethodsMap(),this,list);
+							}
+
+						}
+					}else{
+						MethodImpl originalCallMethod =getMethodsMap().get("core").treeCopyNoTransform();
+						String name = originalCallMethod.getMethodSig().getName() + "$ORIGIN_core";
+						originalCallMethod.getMethodSig().setName(name);
+						originalMethodsListInClass.add(originalCallMethod);
+						for(OriginalCall o:list)
+							originalCallMethod.replaceOriginalMethodWithSynOp(this,o);
+					}
+				}
+			}
+		}catch(Exception e){
+			System.err.println("Exception in checkForOriginalCall "+e);
+		}
+	}
+
+	public void MethodImpl.checkForFurtherOriginalCall(java.util.List deltaIds,ArrayList originalMethodsListInClass,Stack<String> methodsStack,int pos,HashMap<String,MethodImpl> methodsMap,MethodImpl orignalGetAddedToMe,ArrayList<OriginalCall> orgnlCallListFrmParent){
+		try{
+			ArrayList<OriginalCall> list = new ArrayList<>();
+			for(Stmt stmt:getBlock().getStmts()){
+				collectOrignalMethods(list, stmt);
+			}
+
+			if(list.size()>=1){
+
+				if((methodsStack.peek()).equals("core")){
+					String oldName= getMethodSig().getName();
+					String nameOfMethod = oldName + "$ORIGIN_core";
+					getMethodSig().setName(nameOfMethod);
+					originalMethodsListInClass.add(this);
+					for(OriginalCall o:list)
+						replaceOriginalMethodWithSynOp(orignalGetAddedToMe,o);
+				}else{
+					String oldMethodName= getMethodSig().getName();
+					String name = oldMethodName + "$ORIGIN_"+getMethodDeltaName();
+					getMethodSig().setName(name);
+					originalMethodsListInClass.add(this);
+					for(OriginalCall o:orgnlCallListFrmParent)
+						replaceOriginalMethodWithSynOp(orignalGetAddedToMe,o);
+					methodsStack.pop();
+					String topOfStack=getMethodsStack().peek();
+					if(pos >=0){
+						while(!(topOfStack).equals(deltaIds.get(pos))){
+							if(topOfStack.equals("core")){
+								MethodImpl methodImpli = methodsMap.get("core").treeCopyNoTransform();
+								String nameOfMethod = methodImpli.getMethodSig().getName() + "$ORIGIN_core";
+								methodImpli.getMethodSig().setName(nameOfMethod);
+								originalMethodsListInClass.add(methodImpli);
+								ArrayList<OriginalCall> listOrg = new ArrayList<OriginalCall>();
+								this.collectOrignalMethods(listOrg,this);
+								for(OriginalCall o:listOrg)
+									getMethodsMap().get("core").replaceOriginalMethodWithSynOp(this,o);
+								break;
+							}else{
+								methodsStack.pop();
+								break;
+							}
+
+						}
+					}
+
+					if(!(getMethodsStack().peek()).equals("core")){
+						MethodImpl nextMethodFromStack = getMethodsMap().get(getMethodsStack().peek());
+						nextMethodFromStack.checkForFurtherOriginalCall(deltaIds,originalMethodsListInClass,methodsStack,pos-1,methodsMap,this,list);	
+					}
+				}
+
+			}else{
+				//no more original calls     
+				String name = getMethodSig().getName() + "$ORIGIN_core";
+				getMethodSig().setName(name);
+				originalMethodsListInClass.add(this);
+				for(OriginalCall o:orgnlCallListFrmParent)
+					replaceOriginalMethodWithSynOp(orignalGetAddedToMe,o);
+			}
+		}catch(Exception e){
+			System.err.println("Exception in checkFurtherForOriginalCall "+e);
+		}
+	}
+
+
+	public void MethodImpl.replaceOriginalMethodWithSynOp(MethodImpl originalGetReplacedInMe,OriginalCall o){
+		MethodImpl originalCallMethod = this;
+		EffExp call = new SyncCall(new ThisExp(),originalCallMethod.getMethodSig().getName(), o.getParams().treeCopyNoTransform());
+		String n = originalCallMethod.getMethodSig().getName();
+		call.setPosition(o.getStartLine(), o.getStartColumn(), o.getEndLine(), o.getEndColumn());
+		ASTNode parent = o.getParent();
+		int i = parent.getIndexOfChild(o);
+		parent.setChild(call, i);
+		call.setParent(parent);
+	}
+
+
+	public void MethodImpl.collectOrignalMethods(ArrayList<OriginalCall> list, ASTNode<ASTNode> node){
+		if(node instanceof OriginalCall){
+			list.add((OriginalCall)node);
+			return;
+		}
+		if(node != null && node.children != null){
+			for (ASTNode<ASTNode> child : node.children) {
+				collectOrignalMethods(list,child);
+			}
+		}
+	}
+
+
+}

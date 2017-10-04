@@ -1,0 +1,144 @@
+aspect ClassModification{
+
+
+	abstract void Modifier.findExistingClassModificationList(Modifier modifier,Map<ASTNode, ASTNode> classModificationMap,ClassDecl cls);
+	abstract void MethodModifier.findExistingClassModificationList(Modifier modifier,Map<ASTNode, ASTNode> classModificationMap,ClassDecl cls);
+	abstract void TraitExpr.findExistingClassModificationList(Modifier modifier,Map<ASTNode, ASTNode> classModificationMap,ClassDecl cls);
+
+	public void DeltaTraitModifier.findExistingClassModificationList(Modifier modifier,Map<ASTNode, ASTNode> classModificationMap,ClassDecl cls){
+		System.out.println("DeltaTraitModifier.findExistingClassModificationList for "+getMethodModifier());
+		getMethodModifier().findExistingClassModificationList(modifier,classModificationMap,cls);
+	}
+
+	public void AddFieldModifier.findExistingClassModificationList(Modifier modifier,Map<ASTNode, ASTNode> classModificationMap,ClassDecl cls){
+		//modifiersList.add(this);
+		FieldDecl field = getFieldDecl();
+		field.setApplicationConditionField(deltaApplicationConditionAttribute());
+		field.updateApplicationConditionFieldOfChild();
+		this.applyTo(cls);
+	}
+	public void RemoveFieldModifier.findExistingClassModificationList(Modifier modifier,Map<ASTNode, ASTNode> classModificationMap,ClassDecl cls){
+		//modifiersList.add(this);
+		classModificationMap.put(this,cls);
+	}
+	public void RemoveMethodModifier.findExistingClassModificationList(Modifier modifier,Map<ASTNode, ASTNode> classModificationMap,ClassDecl cls){
+		System.out.println("Inside RemoveMethodModifier--------");
+		classModificationMap.put(this,cls);
+	}
+
+
+	public void AddMethodModifier.findExistingClassModificationList(Modifier modifier,Map<ASTNode, ASTNode> classModificationMap,ClassDecl cls){
+		getTraitExpr().findExistingClassModificationList(modifier,classModificationMap,cls);
+	}
+
+	public void ModifyMethodModifier.findExistingClassModificationList(Modifier modifier,Map<ASTNode, ASTNode> classModificationMap,ClassDecl cls){
+		getTraitExpr().findExistingClassModificationList(modifier,classModificationMap,cls);
+	}
+
+
+	public void TraitSetExpr.findExistingClassModificationList(Modifier modifier,Map<ASTNode, ASTNode> classModificationMap,ClassDecl cls){
+		if(getParent() instanceof AddMethodModifier){
+			System.out.println("Inside AddMethodModifier----modifier----"+modifier);
+			System.out.println("Inside AddMethodModifier----cls----"+cls);
+			String addedBy="";
+			for (MethodImpl addedMethod : getMethodImpls()){
+				System.out.println("Inside AddMethodModifier--------"+addedMethod);
+				MethodImpl newMet = addedMethod.treeCopyNoTransform();
+				addedBy=modifier.getDelta().getName();
+				System.out.println("Added by::" +addedBy);
+				newMet.setAddedBy(addedBy);
+				newMet.setParent(addedMethod.getParent());
+				MethodSig newSig = addedMethod.getMethodSig().treeCopyNoTransform();
+				newSig.setParent(newMet);
+				newMet.setMethodSig(newSig);
+				newMet.setApplicationConditionField(modifier.deltaApplicationConditionAttribute());
+				newMet.updateApplicationConditionFieldOfChild();
+				cls.addMethod(newMet);
+			}
+		}else if(getParent() instanceof ModifyMethodModifier){
+			System.out.println("Instance of ModifyMethodmodifier---"+modifier);
+			for(MethodImpl modifiedMethod : getMethodImpls()){
+				System.out.println(modifier.getDelta().getName()+" inside ModifyMethodModifier "+ modifiedMethod.getMethodSig().getName());
+				AppCond dMOdifier=modifier.deltaApplicationConditionAttribute();
+				System.out.println(dMOdifier.toString());
+				modifiedMethod.getOriginalCallStack(cls);
+				modifiedMethod.setApplicationConditionField(modifier.deltaApplicationConditionAttribute());
+				modifiedMethod.setMethodDeltaName(modifier.getDelta().getName());
+				MethodImpl newMet = modifiedMethod.treeCopyNoTransform();
+				newMet.setParent(modifiedMethod.getParent());
+				MethodSig newSig = modifiedMethod.getMethodSig().treeCopyNoTransform();
+				newSig.setParent(newMet);
+				newMet.setMethodSig(newSig);
+				newMet.setMethodDeltaName(modifier.getDelta().getName());
+				newMet.setApplicationConditionField(modifier.deltaApplicationConditionAttribute());//Check
+				AppCond DnewMet=newMet.getApplicationConditionField();
+				System.out.println(DnewMet.toString());
+				//System.out.println("newMet.deltaApplicationConditionAttribute() "+(modifier.getApplicationConditionField()).toString());
+				newMet.updateApplicationConditionFieldOfChild();
+				cls.addMethod(newMet);
+			}
+			classModificationMap.put(modifier,cls);
+		}else if(getParent() instanceof TraitModifyExpr){
+			ASTNode expr= this.getParent();
+			while (!(expr instanceof AddMethodModifier) && !(expr instanceof ModifyMethodModifier)) {
+				System.out.println("Inside while  child "+expr);
+				expr = expr.getParent();
+
+			}
+
+			if(expr instanceof ModifyMethodModifier){
+				System.out.println("Instance of ModifyMethodmodifier---"+modifier);
+				for(MethodImpl modifiedMethod : getMethodImpls()){
+					System.out.println(modifier.getDelta().getName()+" inside ModifyMethodModifier "+ modifiedMethod.getMethodSig().getName());
+					AppCond dMOdifier=modifier.deltaApplicationConditionAttribute();
+					System.out.println(dMOdifier.toString());
+					modifiedMethod.getOriginalCallStack(cls);
+					modifiedMethod.setApplicationConditionField(modifier.deltaApplicationConditionAttribute());
+					modifiedMethod.setMethodDeltaName(modifier.getDelta().getName());
+					MethodImpl newMet = modifiedMethod.treeCopyNoTransform();
+					newMet.setParent(modifiedMethod.getParent());
+					MethodSig newSig = modifiedMethod.getMethodSig().treeCopyNoTransform();
+					newSig.setParent(newMet);
+					newMet.setMethodSig(newSig);
+					newMet.setMethodDeltaName(modifier.getDelta().getName());
+					newMet.setApplicationConditionField(modifier.deltaApplicationConditionAttribute());//Check
+					AppCond DnewMet=newMet.getApplicationConditionField();
+					System.out.println(DnewMet.toString());
+					//System.out.println("newMet.deltaApplicationConditionAttribute() "+(modifier.getApplicationConditionField()).toString());
+					newMet.updateApplicationConditionFieldOfChild();
+					cls.addMethod(newMet);
+				}
+				classModificationMap.put(modifier,cls);
+			}else{
+				System.out.println("Inside AddMethodModifier modifyExpr----modifier----"+modifier);
+				System.out.println("Inside AddMethodModifier----cls----"+cls);
+				String addedBy="";
+				for (MethodImpl addedMethod : getMethodImpls()){
+					System.out.println("Inside AddMethodModifier--------"+addedMethod);
+					MethodImpl newMet = addedMethod.treeCopyNoTransform();
+					addedBy=modifier.getDelta().getName();
+					System.out.println("Added by::" +addedBy);
+					newMet.setAddedBy(addedBy);
+					newMet.setParent(addedMethod.getParent());
+					MethodSig newSig = addedMethod.getMethodSig().treeCopyNoTransform();
+					newSig.setParent(newMet);
+					newMet.setMethodSig(newSig);
+					newMet.setApplicationConditionField(modifier.deltaApplicationConditionAttribute());
+					newMet.updateApplicationConditionFieldOfChild();
+					cls.addMethod(newMet);
+				}
+			}
+			//getMethodModifier().findExistingClassModificationList(getMethodModifier(),classModificationMap,cls);
+		}else{
+			System.out.println("Special case");
+		}
+	}
+
+	public void TraitModifyExpr.findExistingClassModificationList(Modifier modifier,Map<ASTNode, ASTNode> classModificationMap,ClassDecl cls){
+		getTraitExpr().findExistingClassModificationList(modifier,classModificationMap,cls);
+		getMethodModifier().findExistingClassModificationList(getMethodModifier(),classModificationMap,cls);
+	}
+
+	public void TraitNameExpr.findExistingClassModificationList(Modifier modifier,Map<ASTNode, ASTNode> classModificationMap,ClassDecl cls){}
+
+}

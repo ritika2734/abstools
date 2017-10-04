@@ -1,0 +1,19 @@
+aspect ChocoModelField{
+	private org.chocosolver.solver.Model ASTNode.chocoModelField=null;
+	private ArrayList<BoolVarImpl> ASTNode.chocoVariablesList=null;
+
+	public org.chocosolver.solver.Model ASTNode.getChocoModelField(){
+		return this.chocoModelField;
+	}
+	public void ASTNode.setChocoModelField(org.chocosolver.solver.Model model){
+		this.chocoModelField=model;
+	}
+	
+	public ArrayList<BoolVarImpl> ASTNode.getChocoVariablesList(){
+		return this.chocoVariablesList;
+	}
+	public void ASTNode.setChocoVariablesList(ArrayList<BoolVarImpl> list){
+		this.chocoVariablesList=list;
+	}
+
+}

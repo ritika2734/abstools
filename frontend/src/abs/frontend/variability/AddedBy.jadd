@@ -1,0 +1,32 @@
+aspect AddedBy{
+	private String Decl.addedBy;
+	//private String DataTypeDecl.addedBy;
+
+	public String Decl.getAddedBy(){
+		return this.addedBy;
+	}
+
+	public void Decl.setAddedBy(String s){
+		this.addedBy =s;
+	}
+	
+	private String MethodImpl.addedBy;
+	//private String DataTypeDecl.addedBy;
+
+	public String MethodImpl.getAddedBy(){
+		return this.addedBy;
+	}
+
+	public void MethodImpl.setAddedBy(String s){
+		this.addedBy =s;
+	}
+	
+	/*public String DataTypeDecl.getAddedBy(){
+		return this.addedBy;
+	}
+
+	public void DataTypeDecl.setAddedBy(String s){
+		this.addedBy =s;
+	}*/
+	
+}
