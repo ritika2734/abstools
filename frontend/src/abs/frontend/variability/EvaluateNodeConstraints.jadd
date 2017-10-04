@@ -625,9 +625,6 @@ aspect EvaluateNodeConstraints{
 				if(tree!=null){
 					for(BoolVarImpl var: this.getChocoVariablesList()){
 						if(productFeatureSet.contains(var.getName())){
-							if(this.getMethodSig().getName().equals("sayBye")){
-								System.out.println("Setting 1 for"+var.getName());
-							}
 							chocoModel.arithm(var,"=",1).post();
 						}else{
 							chocoModel.arithm(var,"=",0).post();
