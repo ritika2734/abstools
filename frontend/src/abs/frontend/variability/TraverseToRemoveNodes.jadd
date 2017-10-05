@@ -7,8 +7,6 @@ aspect TraverseToRemoveNodes{
 		try{
 			for(CompilationUnit c: model.getCompilationUnits()){
 				for(ModuleDecl moduleDecl: c.getModuleDecls()){
-					System.out.println("ModuleDecl inside traverse-->"+moduleDecl.getName());
-					System.out.println("sortedDeltasIds"+sortedDeltasIds);
 					moduleDecl.traverseToRemoveNodes(sortedDeltasIds);
 				}
 			}
@@ -118,7 +116,6 @@ aspect TraverseToRemoveNodes{
 			}
 
 			for(MethodImpl methodImpl: methodsToRemoveInClassList){
-				System.out.println(this.getName()+" methodsToRemoveInClassList are::"+methodsToRemoveInClassList);
 				this.getMethods().removeChild(this.getMethods().getIndexOfChild(methodImpl));
 			}
 
@@ -135,7 +132,6 @@ aspect TraverseToRemoveNodes{
 			for(MethodImpl methodImpl : originalMethodsListInClass){
 				//i= getNumMethod();
 				//getMethods().setChild(methodImpl, i);
-				System.out.println(methodImpl.getMethodSig().getName()+"Adding method"+methodImpl.getBlock());
 				cls.addMethod(methodImpl);
 			}
 		}catch(Exception e){

@@ -16,7 +16,6 @@ aspect ModificationNodes{
 			for (Modifier mod : getModifiers()) {
 				//Check this statement
 				//mod.setApplicationConditionField(deltaApplicationConditionAttribute());
-				System.out.println("Mod is££££ "+mod);
 				mod.findExistingClassModificationList(mod,modifyClassMap,cls);
 			}
 

@@ -429,18 +429,11 @@ aspect ConstraintForEachNode{
 			System.out.println("Exception in formConstraint"+e);
 		}
 	}*/
-	
-	
-	public void MethodImpl.formConstraintForEachNode(Model m) {
+
+
+	/*public void MethodImpl.formConstraintForEachNode(Model m) {
 		AppCond applicationCondition=this.getApplicationConditionField();
 		//LogOp nodeConstraint;
-		
-		if((getMethodSig().getName()).equals("sayHello")){
-			System.out.println("getMethodSig() parent:: "+getParent().getParent());
-			System.out.println("getMethodSig():: "+getBlock());
-			System.out.println("getChocoVariablesList():: "+getChocoVariablesList());
-			System.out.println("applicationCondition:: "+applicationCondition);
-		}
 		try{
 			if(this.getChocoVariablesList()!=null)
 			{
@@ -455,19 +448,14 @@ aspect ConstraintForEachNode{
 					for(BoolVarImpl var: this.getChocoVariablesList()){
 						if (!includedFeatures.contains(var.getName())){
 							LogOp nodeConstraint =this.getNodeLogOpConstraint();
-							this.setNodeLogOpConstraint(LogOp.and(nodeConstraint,LogOp.or(var.not(),var)));
+							this.setNodeLogOpConstraint(LogOp.and(nodeConstraint,LogOp.or(LogOp.nor(var),var)));
 						}
 					}
 					for(BoolVarImpl var: this.getChocoVariablesList()){
 						if(parentFeatures.contains(var.getName()))
 							this.setNodeLogOpConstraint(LogOp.and(this.getNodeLogOpConstraint(),var));
 					}	
-					
-					if((getMethodSig().getName()).equals("sayHello")){
-						if(getParent().getParent() instanceof ClassDecl){
-							System.out.println("getNodeLogOpConstraint()::"+getNodeLogOpConstraint());
-						}
-					}
+
 				}
 			}else{
 				System.out.println("varaibleList is null for->"+this);
@@ -478,7 +466,7 @@ aspect ConstraintForEachNode{
 		}catch(Exception e){
 			System.out.println("Exception in formConstraint"+e);
 		}
-	}
+	}*/
 
 
 	public void ASTNode.formConstraintForEachNode(Model m) {

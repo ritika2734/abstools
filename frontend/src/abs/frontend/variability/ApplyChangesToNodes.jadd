@@ -7,26 +7,13 @@ aspect ApplyChangesToNodes{
 	public void TraitNameExpr.applyChangesToClass(Modifier modifier,ClassDecl cls){}
 
 	public void TraitSetExpr.applyChangesToClass(Modifier modifier,ClassDecl cls){
-		System.out.println("inside  of TraitSetExpr.applyChangesToClass"+this);
 		if(getParent() instanceof ModifyMethodModifier){
-			System.out.println("Instance of ModifyMethodModufier");
-
 			for (MethodImpl modifiedMethod : getMethodImpls()){
 				String addedBy="";
 				for(MethodImpl classMethodImpl: cls.getMethods()){
 					if(classMethodImpl.getMethodSig().getName().equals(modifiedMethod.getMethodSig().getName())){
-						System.out.println("====modifiedMethod.getApplicationConditionField() "+modifiedMethod.getApplicationConditionField());
-						System.out.println("====classMethodImpl.getApplicationConditionField() "+classMethodImpl.getApplicationConditionField());
 						if (!(classMethodImpl.getMethodDeltaName().equals(modifiedMethod.getMethodDeltaName()))){
-							System.out.println("modifier:"+modifier.deltaApplicationConditionAttribute());
-							System.out.println("modifiedMethod:"+modifiedMethod.getMethodSig().getName());
-							System.out.println("modifiedMethod body:"+modifiedMethod.getBlock());
-							System.out.println("modifiedMethod getApplicationConditionField:"+modifiedMethod.getApplicationConditionField());
-							System.out.println("classMethod:"+classMethodImpl.getMethodSig().getName());
-							System.out.println("classMethod body:"+classMethodImpl.getBlock());
-							System.out.println("classMethod getApplicationConditionField: "+classMethodImpl.getApplicationConditionField());
 							addedBy=classMethodImpl.getAddedBy();
-							System.out.println("addedBy::"+addedBy);
 							AppCond oldValue=classMethodImpl.getApplicationConditionField();
 							AppCond newValue=flipTheBit(modifier.deltaApplicationConditionAttribute());
 							if(oldValue!=null){
@@ -36,8 +23,6 @@ aspect ApplyChangesToNodes{
 							}
 							classMethodImpl.updateApplicationConditionFieldOfChild();
 						}else{
-							System.out.println("same as class:"+classMethodImpl.getMethodSig().getName());
-							System.out.println("same as class body:"+classMethodImpl.getBlock());
 							classMethodImpl.setAddedBy(addedBy);
 							break;
 						}
@@ -47,27 +32,15 @@ aspect ApplyChangesToNodes{
 		}else if(getParent() instanceof TraitModifyExpr){
 			ASTNode expr= this.getParent();
 			while (!(expr instanceof AddMethodModifier) && !(expr instanceof ModifyMethodModifier)) {
-				System.out.println("Inside while  child "+expr);
 				expr = expr.getParent();
-				System.out.println("Inside while  parent "+expr);
 			}
 			if(expr instanceof ModifyMethodModifier){
 				for (MethodImpl modifiedMethod : getMethodImpls()){
 					String addedBy="";
 					for(MethodImpl classMethodImpl: cls.getMethods()){
 						if(classMethodImpl.getMethodSig().getName().equals(modifiedMethod.getMethodSig().getName())){
-							System.out.println("====modifiedMethod.getApplicationConditionField() "+modifiedMethod.getApplicationConditionField());
-							System.out.println("====classMethodImpl.getApplicationConditionField() "+classMethodImpl.getApplicationConditionField());
 							if (!(classMethodImpl.getMethodDeltaName().equals(modifiedMethod.getMethodDeltaName()))){
-								System.out.println("modifier:"+modifier.deltaApplicationConditionAttribute());
-								System.out.println("modifiedMethod:"+modifiedMethod.getMethodSig().getName());
-								System.out.println("modifiedMethod body:"+modifiedMethod.getBlock());
-								System.out.println("modifiedMethod getApplicationConditionField:"+modifiedMethod.getApplicationConditionField());
-								System.out.println("classMethod:"+classMethodImpl.getMethodSig().getName());
-								System.out.println("classMethod body:"+classMethodImpl.getBlock());
-								System.out.println("classMethod getApplicationConditionField: "+classMethodImpl.getApplicationConditionField());
 								addedBy=classMethodImpl.getAddedBy();
-								System.out.println("addedBy::"+addedBy);
 								AppCond oldValue=classMethodImpl.getApplicationConditionField();
 								AppCond newValue=flipTheBit(modifier.deltaApplicationConditionAttribute());
 								if(oldValue!=null){
@@ -77,8 +50,6 @@ aspect ApplyChangesToNodes{
 								}
 								classMethodImpl.updateApplicationConditionFieldOfChild();
 							}else{
-								System.out.println("same as class:"+classMethodImpl.getMethodSig().getName());
-								System.out.println("same as class body:"+classMethodImpl.getBlock());
 								classMethodImpl.setAddedBy(addedBy);
 								break;
 							}
@@ -98,7 +69,6 @@ aspect ApplyChangesToNodes{
 		getTraitExpr().applyChangesToClass(modifier,decl);
 	}
 	public void ModifyMethodModifier.applyChangesToClass(Modifier modifier,ClassDecl decl){
-		System.out.println("Inside ModifyMethodModifier.applyChangesToClass");
 		getTraitExpr().applyChangesToClass(modifier,decl);
 	}
 
@@ -153,7 +123,6 @@ aspect ApplyChangesToNodes{
 
 	public void ModifyMethodModifier.applyChangesTo(ASTNode classDecl){
 		try{
-			System.out.println("Inside ModifyMethodModifier.applyChangesTo is    ::"+this.getTraitExpr());
 			ClassDecl cls= (ClassDecl)classDecl;
 			getTraitExpr().applyChangesToClass(this,cls);
 			/*for (MethodImpl modifiedMethod : set.getMethodImpls()){
@@ -214,23 +183,16 @@ aspect ApplyChangesToNodes{
 					if (iface.getName().equals(toRemove.getName())) {
 						//cls.getImplementedInterfaceUseList().removeChild(cls.getImplementedInterfaceUseList().getIndexOfChild(iface));// found = true;
 						AppCond oldValue=iface.getApplicationConditionField();
-						System.out.println("1"+toRemove);
-
 						AppCond newValue=flipTheBit(this.deltaApplicationConditionAttribute());
-						System.out.println("2"+toRemove);
 
 						if(oldValue!=null){
 							iface.setApplicationConditionField(new AppCondAnd(newValue,oldValue));
-							System.out.println("3"+toRemove);
-
 						}
 						else{
 							iface.setApplicationConditionField(newValue);
-							System.out.println("4"+toRemove);
 						}
 
 						iface.updateApplicationConditionFieldOfChild();
-						System.out.println("5"+toRemove);
 						found=true;
 						break;
 					}
@@ -239,7 +201,6 @@ aspect ApplyChangesToNodes{
 					throw new DeltaModellingException(getDelta(),
 							" wants to remove interface [" + toRemove.getName() + "] from class [" + cls.getName()
 							+ "]. However, the class does not implement that interface.");
-				System.out.println("6"+toRemove);
 			}
 		}catch(Exception e){
 			System.out.println("Exception in ModifyClassModifier applyChanges");

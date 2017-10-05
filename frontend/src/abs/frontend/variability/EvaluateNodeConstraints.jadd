@@ -639,12 +639,6 @@ aspect EvaluateNodeConstraints{
 
 				Solver solver= chocoModel.getSolver();
 				Solution s= solver.findSolution();
-				if(this.getMethodSig().getName().equals("sayBye")){
-					System.out.println("parent of parent is: "+getParent().getParent());
-					System.out.println("MethodImpl name is"+this.getMethodSig().getName());
-					System.out.println("MethodImpl block is"+this.getBlock());
-					System.out.println("Solution is"+s);
-				}
 				if(s!=null){
 					setBooleanValue(true);
 				}else{
@@ -654,7 +648,6 @@ aspect EvaluateNodeConstraints{
 
 			}else{
 				this.setBooleanValue(true);	
-				System.out.println("chocomodel Null for"+this);
 			}
 			for (int i=0; i<getNumChild(); i++) {
 				getChild(i).evaluateNodeConstraints(productFeatureSet);
@@ -700,13 +693,12 @@ aspect EvaluateNodeConstraints{
 
 			}else{
 				this.setBooleanValue(true);	
-				System.out.println("chocomodel Null for"+this);
 			}
 			for (int i=0; i<getNumChild(); i++) {
 				getChild(i).evaluateNodeConstraints(productFeatureSet);
 			}
 		}catch(Exception e){
-			System.err.println("Second Exception14 izzzzz::"+e.getMessage());
+			System.err.println("Exception in evaluating node constraints::"+e.getMessage());
 			System.exit(1);
 		}
 	}
