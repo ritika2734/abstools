@@ -17,6 +17,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.jar.JarEntry;
@@ -71,6 +72,7 @@ public class Main {
     protected boolean minimise = false ;
     protected boolean maximise = false ;
     protected boolean variability=false;
+    public ArrayList<String> products = new ArrayList<>();
 
 
     public static void main(final String... args)  {
@@ -102,9 +104,11 @@ public class Main {
             } else if (argslist.contains("-outline")) {
                 abs.backend.outline.OutlinePrinterBackEnd.main(args);
             } else {
-                Model m = parse(args);
-                if (m.hasParserErrors()) {
-                    printParserErrorAndExit();
+                ArrayList<Model> modelList = parse(args);
+                for(Model m: modelList){
+                    if (m.hasParserErrors()) {
+                        printParserErrorAndExit();
+                    }
                 }
             }
         } catch (Exception e) {
@@ -192,17 +196,109 @@ public class Main {
             } else if (arg.equals("-h") || arg.equals("-help")
                     || arg.equals("--help")) {
                 printUsageAndExit();
+            } else if (arg.startsWith("-products=")) {
+                String productsArr = arg.split("=")[1];
+                products=new ArrayList<String>(Arrays.asList(productsArr.split(",")));
+                System.err.println("products are "+products);
+
             } else
                 remainingArgs.add(arg);
         }
         return remainingArgs;
     }
 
-    public Model parse(final String[] args) throws IOException, DeltaModellingException, WrongProgramArgumentException, ParserConfigurationException {
+    public ArrayList<Model> parse(final String[] args) throws IOException, DeltaModellingException, WrongProgramArgumentException, ParserConfigurationException {
+        ArrayList<Model> listOfmodels= new ArrayList<Model>(); 
+        // Map<String,Model> modelMap= new HashMap<String,Model>();
         Model m = parseFiles(parseArgs(args).toArray(new String[0]));
-        analyzeModel(m);
-        return m;
+        // Model mCopy = parseFiles(parseArgs(args).toArray(new String[0]));
+        //analyzeModel(m,mCopy);
+        //modelMap.put("Old", m);
+        //modelMap.put("Modified", mCopy);
+        if(variability){
+            ArrayList<String> sortedDeltaidsNameList = new ArrayList<String>();
+            ArrayList<DeltaDecl> deltas = new ArrayList<DeltaDecl>();
+            getVariableAwareAST(m,sortedDeltaidsNameList,deltas);
+            createModelsBasedOnProductNames(m,listOfmodels,sortedDeltaidsNameList);
+        }
+        
+        if(!variability){
+           // product=products.get(0);
+            analyzeModel(m);
+            listOfmodels.add(m);
+        }else{
+            for(Model modelFromList:listOfmodels){
+                System.out.println("----------Start--------------------"+listOfmodels.size());
+                modelFromList.dump();
+                System.out.println("-------------End-----------------");
+                modelFromList.flushCache();
+                modelFromList.flushAttrAndCollectionCache();
+                modelFromList.flushCollectionCache();
+                modelFromList.flushTreeCache();
+                analyzeModel(modelFromList);
+            }     
+        }
+
+        return listOfmodels;
     }
+
+    public void createModelsBasedOnProductNames(Model m,java.util.List<Model> listOfmodels,ArrayList<String> sortedDeltasIds) throws WrongProgramArgumentException, IOException{
+
+        if(products.size()!=1){
+            for(int i=0;i< products.size();i++){
+                //Model mCopy= m.createModelCopy(m);
+                Model mCopy = m.treeCopyNoTransform();
+                //exceptionHack(mCopy);
+                mCopy.verbose=verbose;
+                mCopy.debug=debug;
+                String productName = products.get(i);
+                ArrayList<DeltaDecl> deltas = new ArrayList<DeltaDecl>();
+                ProductLine pl= mCopy.getProductLine();
+                ProductDecl productDecl=mCopy.findProduct(productName);
+                Product product =productDecl.getProduct();
+                for (String deltaid : sortedDeltasIds)
+                    deltas.add(mCopy.getDeltaDeclsMap().get(deltaid));
+                pl.substituteModuleParams(mCopy, product,deltas,productName);
+                mCopy.evaluateNodeConstraints(product);
+                mCopy.traverseToRemoveNodes(mCopy,sortedDeltasIds);
+                listOfmodels.add(mCopy);
+            }
+        }else{
+            m.verbose=verbose;
+            m.debug=debug;
+            String productName = products.get(0);
+            ArrayList<DeltaDecl> deltas = new ArrayList<DeltaDecl>();
+            ProductLine pl= m.getProductLine();
+            ProductDecl productDecl=m.findProduct(productName);
+            Product product =productDecl.getProduct();
+            for (String deltaid : sortedDeltasIds)
+                deltas.add(m.getDeltaDeclsMap().get(deltaid));
+            pl.substituteModuleParams(m, product,deltas,productName);
+            m.evaluateNodeConstraints(product);
+            m.traverseToRemoveNodes(m,sortedDeltasIds);
+            listOfmodels.add(m);
+        }
+    }
+
+    public Model createCopyOfModel(Model m) throws DeltaModellingException, WrongProgramArgumentException{
+        List<CompilationUnit> cuList= new List<CompilationUnit>();
+        for(CompilationUnit c: m.getCompilationUnits()){
+            cuList.add(c.treeCopyNoTransform());
+        }
+        Model mNew = new Model(cuList);
+        //Main.exceptionHack(mNew);
+        return mNew;
+    }
+
+    public void getVariableAwareAST(Model m,ArrayList<String> sortedDeltaidsNameList,ArrayList<DeltaDecl> deltas) throws DeltaModellingException, WrongProgramArgumentException{
+        ProductLine pl= m.getProductLine();
+        m.evaluateAllProductDeclarations();
+        m.chocoModelFormation();
+        m.applyTraits();
+        m.variabilityAST(pl,sortedDeltaidsNameList,deltas);
+        m.formConstraintForEachNode();  
+    }
+
 
     public Model parseFiles(String... fileNames) throws IOException {
         if (fileNames.length == 0) {
@@ -245,11 +341,16 @@ public class Main {
 
     public void analyzeModel(Model m) throws WrongProgramArgumentException, DeltaModellingException, FileNotFoundException, ParserConfigurationException {
         m.verbose = verbose;
+        //mCopy.verbose= verbose;
         m.debug = debug;
+        // mCopy.debug=debug;
 
         // drop attributes before calculating any attribute
-        if (ignoreattr)
+        if (ignoreattr){
             m.dropAttributes();
+            //mCopy.dropAttributes();
+        }
+
 
         if (verbose) {
             System.out.println("Analyzing Model...");
@@ -263,9 +364,20 @@ public class Main {
             }
             return;
         }
-
-        m.evaluateAllProductDeclarations(); // resolve ProductExpressions to simple sets of features
+        /*if (mCopy.hasParserErrors()) {
+            System.err.println("Syntactic errors: " + mCopy.getParserErrors().size());
+            for (ParserError e : mCopy.getParserErrors()) {
+                System.err.println(e.getHelpMessage());
+                System.err.flush();
+            }
+            return;
+        }*/
+        //Remove
+        if(!variability)
+            m.evaluateAllProductDeclarations(); // resolve ProductExpressions to simple sets of features
+        //mCopy.evaluateAllProductDeclarations(); // resolve ProductExpressions to simple sets of features
         if(!variability){
+            System.out.println("Product is::"+product);
             rewriteModel(m, product);
             m.flattenTraitOnly();
             m.collapseTraitModifiers();
@@ -290,65 +402,91 @@ public class Main {
                     m.flattenForProductUnsafe(product);
             }
         }else{
-            ArrayList<String> sortedDeltaidsNameList = new ArrayList<String>();
+            /* ArrayList<String> sortedDeltaidsNameList = new ArrayList<String>();
             ArrayList<DeltaDecl> deltas = new ArrayList<DeltaDecl>();
-            ProductLine pl= m.getProductLine();
+            ProductLine pl= mCopy.getProductLine();
             if(product!=null)
-                m.findProduct(product);
+                mCopy.findProduct(product);
             Long timeStartVariability=System.currentTimeMillis();
             //m.flushTreeCache();
-            m.variabilityAST(pl,sortedDeltaidsNameList,deltas);
+            mCopy.variabilityAST(pl,sortedDeltaidsNameList,deltas);
             System.out.println("sortedDeltaidsNameList::"+sortedDeltaidsNameList);
             //long timeEndVariability = System.currentTimeMillis() - timeStartVariability;
             //System.err.println("Elapsed time in variabilityAST milliseconds::"+timeEndVariability);
-            m.chocoModelFormation();
+            mCopy.chocoModelFormation();
             //long timeEndChoco = System.currentTimeMillis() - timeStartVariability;
             //System.err.println("Elapsed time in chcoModelFormation milliseconds::"+timeEndChoco);
-            m.formConstraintForEachNode(); 
+            mCopy.formConstraintForEachNode(); 
             long timeEndConstraintForming = System.currentTimeMillis() - timeStartVariability;
             System.err.println("Fixed Elapsed time in variability milliseconds::"+timeEndConstraintForming);
             Long timeStartProduct=System.currentTimeMillis();
             if(product!=null){
                 // Substituting delta parameters
-                ProductDecl productDecl=m.findProduct(product);
+                ProductDecl productDecl=mCopy.findProduct(product);
                 Product productFromDecl=productDecl.getProduct();
-                pl.substituteModuleParams(m, productFromDecl,deltas,product);
+                pl.substituteModuleParams(mCopy, productFromDecl,deltas,product);
                 //long timeEndSubstitution = System.currentTimeMillis() - timeStartVariability;
                 //System.err.println("Elapsed time in variable substitution milliseconds::"+timeEndSubstitution);
-                m.evaluateNodeConstraints(productFromDecl);
+                mCopy.evaluateNodeConstraints(productFromDecl);
                 //long timeEndEvaluation = System.currentTimeMillis() - timeStartVariability;
                 //System.err.println("Elapsed time in evaluationof constraints milliseconds::"+timeEndEvaluation);
-                m.traverseToRemoveNodes(m,sortedDeltaidsNameList);
+                mCopy.traverseToRemoveNodes(mCopy,sortedDeltaidsNameList);
                 //long timeEndTraversalRemoval = System.currentTimeMillis() - timeStartVariability;
                 System.err.println("Elapsed time in product milliseconds::"+timeStartProduct);
 
             }
             System.out.println("mODIFIED running");
             //for (CompilationUnit unit: m.getCompilationUnits())
-              //  for (ModuleDecl module: unit.getModuleDecls())
-                //    module.flushCache();
+            //  for (ModuleDecl module: unit.getModuleDecls())
+            //    module.flushCache(); */
 
         }
+        if(!variability){
+            if (dump) {
+                m.dumpMVars();
+                m.dump();
+            }
 
-        if (dump) {
-            m.dumpMVars();
-            m.dump();
+            final SemanticConditionList semErrs = m.getErrors();
+
+            if (semErrs.containsErrors()) {
+                System.err.println("Semantic errors: " + semErrs.getErrorCount());
+            }
+            for (SemanticCondition error : semErrs) {
+                // Print both errors and warnings
+                System.err.println(error.getHelpMessage());
+                System.err.flush();
+            }
+            if (!semErrs.containsErrors()) {
+                typeCheckModel(m);
+                analyzeMTVL(m);
+            }
+        }else{
+            if (dump) {
+                m.dumpMVars();
+                System.out.println("£££££££££££££££££££££");
+                m.dump();
+                System.out.println("£££££££££££££££££££££");
+            }
+
+            final SemanticConditionList semErrsCpy = m.getErrors();
+
+            if (semErrsCpy.containsErrors()) {
+                System.err.println("Semantic errors: " + semErrsCpy.getErrorCount());
+            }
+            for (SemanticCondition error : semErrsCpy) {
+                // Print both errors and warnings
+                System.err.println(error.getHelpMessage());
+                System.err.flush();
+            }
+            if (!semErrsCpy.containsErrors()) {
+                typeCheckModel(m);
+                analyzeMTVL(m);
+                System.out.println("After analyzeMTVL");
+            }
         }
 
-        final SemanticConditionList semErrs = m.getErrors();
 
-        if (semErrs.containsErrors()) {
-            System.err.println("Semantic errors: " + semErrs.getErrorCount());
-        }
-        for (SemanticCondition error : semErrs) {
-            // Print both errors and warnings
-            System.err.println(error.getHelpMessage());
-            System.err.flush();
-        }
-        if (!semErrs.containsErrors()) {
-            typeCheckModel(m);
-            analyzeMTVL(m);
-        }
     }
 
     /**
@@ -460,6 +598,7 @@ public class Main {
      * However, the command-line argument handling will have to stay in Main. Pity.
      */
     private void analyzeMTVL(Model m) {
+        System.out.println("Inside analyzeMTVL");
         ProductDecl productDecl = null;
         try {
             productDecl = product == null ? null : m.findProduct(product);
@@ -569,6 +708,7 @@ public class Main {
     }
 
     private void typeCheckModel(Model m) {
+        System.out.println("Inside typeCheckModel");
         if (typecheck) {
             if (verbose)
                 System.out.println("Typechecking Model...");

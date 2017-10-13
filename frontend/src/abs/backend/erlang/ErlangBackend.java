@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.EnumSet;
 
 import org.apache.commons.io.IOUtils;
@@ -96,10 +97,15 @@ public class ErlangBackend extends Main {
     }
 
     private void compile(String[] args) throws Exception {
-        final Model model = parse(args);
-        if (model.hasParserErrors() || model.hasErrors() || model.hasTypeErrors())
+        final ArrayList<Model> modelList = parse(args);
+        int i=1;
+        for(Model m : modelList){
+        if (m.hasParserErrors() || m.hasErrors() || m.hasTypeErrors())
             printParserErrorAndExit();
-        compile(model, destDir, compileOptions);
+        File destDir = new File("gen/"+i+"/erl");
+        compile(m, destDir, compileOptions);
+        i++;
+        }
     }
 
     private static boolean isWindows() {

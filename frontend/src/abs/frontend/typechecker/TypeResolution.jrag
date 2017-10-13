@@ -67,11 +67,11 @@ aspect TypeResolution {
         return TypeCheckerHelper.getDefinedNames(this, new HashMap<KindedName, ResolvedName>());
     }
 
-    syn lazy boolean ModuleDecl.exportsName(String name) {
+    syn boolean ModuleDecl.exportsName(String name) {
         return ! getExportedNames().getAllNames(name).isEmpty();
     }
 
-    syn lazy boolean ModuleDecl.isVisible(String name) {
+    syn boolean ModuleDecl.isVisible(String name) {
         return ! getVisibleNames().getAllNames(name).isEmpty();
     }
 
@@ -95,7 +95,7 @@ aspect TypeResolution {
         return res;
     }
 
-    syn lazy Collection<DeltaDecl> Model.getDeltaDecls() {
+    syn Collection<DeltaDecl> Model.getDeltaDecls() {
         ArrayList<DeltaDecl> res = new ArrayList<DeltaDecl>();
         for (CompilationUnit u : getCompilationUnits()) {
             for (DeltaDecl d : u.getDeltaDecls()) {
@@ -105,7 +105,7 @@ aspect TypeResolution {
         return res;
     }
 
-    syn lazy Map<String,DeltaDecl> Model.getDeltaDeclsMap() {
+    syn Map<String,DeltaDecl> Model.getDeltaDeclsMap() {
         Map<String,DeltaDecl> res = new HashMap<String,DeltaDecl>();
         for (CompilationUnit u : getCompilationUnits()) {
             for (DeltaDecl d : u.getDeltaDecls()) {
@@ -120,7 +120,7 @@ aspect TypeResolution {
         return getDeltaDeclsMap().get(name);
     }
 
-    syn lazy Collection<UpdateDecl> Model.getUpdateDecls() {
+    syn Collection<UpdateDecl> Model.getUpdateDecls() {
         ArrayList<UpdateDecl> res = new ArrayList<UpdateDecl>();
         for (CompilationUnit u : getCompilationUnits()) {
             for (UpdateDecl d : u.getUpdateDecls()) {
@@ -130,7 +130,7 @@ aspect TypeResolution {
         return res;
     }
 
-    syn lazy Collection<ProductDecl> Model.getProductDecls() {
+    syn Collection<ProductDecl> Model.getProductDecls() {
         ArrayList<ProductDecl> res = new ArrayList<ProductDecl>();
         for (CompilationUnit u : getCompilationUnits()) {
             for (ProductDecl p : u.getProductDecls()) {
@@ -140,7 +140,7 @@ aspect TypeResolution {
         return res;
     }
 
-    syn lazy ProductLine Model.getProductLine() {
+    syn ProductLine Model.getProductLine() {
         for (CompilationUnit u : getCompilationUnits()) {
             if (u.hasProductLine())
                 return u.getProductLine();
@@ -148,7 +148,7 @@ aspect TypeResolution {
         return null;
     }
 
-    syn lazy MainBlock Model.getMainBlock() {
+    syn MainBlock Model.getMainBlock() {
         for (CompilationUnit u : getCompilationUnits()) {
             if (u.hasMainBlock())
                 return u.getMainBlock();
@@ -165,7 +165,7 @@ aspect TypeResolution {
         return null;
     }
 
-    syn lazy MainBlock CompilationUnit.getMainBlock() {
+    syn MainBlock CompilationUnit.getMainBlock() {
         for (ModuleDecl m: getModuleDecls()) {
             if (m.hasBlock())
                 return m.getBlock();
@@ -173,7 +173,7 @@ aspect TypeResolution {
         return null;
     }
 
-    syn lazy MainBlock CompilationUnit.getMainBlock(String moduleName) {
+    syn MainBlock CompilationUnit.getMainBlock(String moduleName) {
         for (ModuleDecl m : getModuleDecls()) {
             if (m.getName().equals(moduleName) && m.hasBlock())
                 return m.getBlock();
@@ -183,16 +183,16 @@ aspect TypeResolution {
 
     syn boolean Model.hasProductLine() = getProductLine() != null;
     syn boolean Model.hasMainBlock() = getMainBlock() != null;
-    syn lazy boolean Model.hasMainBlock(String mainBlock) = getMainBlock(mainBlock) != null;
+    syn boolean Model.hasMainBlock(String mainBlock) = getMainBlock(mainBlock) != null;
     syn boolean CompilationUnit.hasMainBlock() = getMainBlock() != null;
-    syn lazy boolean CompilationUnit.hasMainBlock(String mainBlock) = getMainBlock(mainBlock) != null;
+    syn boolean CompilationUnit.hasMainBlock(String mainBlock) = getMainBlock(mainBlock) != null;
 
     // *decl* refers to the appropriate declaration of the TypeUse or to
     // UnknownDecl if the declaration is missing
-    syn lazy Decl TypeUse.getDecl() = lookup(new KindedName(Kind.TYPE_DECL,getName()));
+    syn Decl TypeUse.getDecl() = lookup(new KindedName(Kind.TYPE_DECL,getName()));
 
 
-    syn lazy ModuleDecl Model.lookupModule(String name) {
+    syn ModuleDecl Model.lookupModule(String name) {
         assert name != null;
         for (CompilationUnit u : getCompilationUnits()) {
             for (ModuleDecl d : u.getModuleDecls()) {
@@ -244,7 +244,7 @@ aspect TypeResolution {
     eq Model.getCompilationUnit().lookupModule(String name) = lookupModule(name);
 
 
-    syn lazy Decl Model.lookup(KindedName name) {
+    syn Decl Model.lookup(KindedName name) {
         for (CompilationUnit u : getCompilationUnits()) {
             for (ModuleDecl d : u.getModuleDecls()) {
                 Decl decl = d.lookup(name);
@@ -331,7 +331,7 @@ aspect TypeResolution {
     // look through local declarations in parametric function, or defer
     // to model. Make sure we only pick up TYPES, and not prematurely abort
     // when data constructors and types overlap (Redmine #109)
-    syn lazy Decl ParametricFunctionDecl.localLookup(KindedName name) {
+    syn Decl ParametricFunctionDecl.localLookup(KindedName name) {
         if (name.getKind() == Kind.TYPE_DECL)
             for (TypeParameterDecl d : getTypeParameters())
                 if (d.getName().equals(name.getName()))
@@ -388,7 +388,7 @@ aspect TypeResolution {
     }
 
 
-    syn lazy Decl FnApp.getDecl() = lookup(new KindedName(Kind.FUN,getName()));
+    syn Decl FnApp.getDecl() = lookup(new KindedName(Kind.FUN,getName()));
 
     inh DataTypeDecl DataConstructor.getDataTypeDecl();
     eq DataTypeDecl.getDataConstructor().getDataTypeDecl() = this;
@@ -448,20 +448,20 @@ aspect TypeResolution {
     eq AsyncCall.isAsync() = true;
     eq AwaitAsyncCall.isAsync() = true;
 
-    syn lazy ModuleDecl ASTNode.getModuleDecl() = calcContextNode(ModuleDecl.class);
+    syn ModuleDecl ASTNode.getModuleDecl() = calcContextNode(ModuleDecl.class);
     /**
      * Return this objects surrounding declaration. Uses the Null Object Pattern,
      * so don't cast the result, as it may be an UnknownDecl.
      */
-    syn lazy Decl ASTNode.getContextDecl() {
+    syn Decl ASTNode.getContextDecl() {
         Decl d = calcContextNode(Decl.class);
         return (d == null ? Model.unknownDecl : d);
     }
-    syn lazy MethodImpl ASTNode.getContextMethod() = calcContextNode(MethodImpl.class);
-    syn lazy Block ASTNode.getContextBlock() = calcContextNode(Block.class);
+    syn MethodImpl ASTNode.getContextMethod() = calcContextNode(MethodImpl.class);
+    syn Block ASTNode.getContextBlock() = calcContextNode(Block.class);
 
     /** returns the parent compilation unit of this node **/
-    syn lazy CompilationUnit ASTNode.getCompilationUnit() = calcContextNode(CompilationUnit.class);
+    syn CompilationUnit ASTNode.getCompilationUnit() = calcContextNode(CompilationUnit.class);
 
     /**
      * checks whether the two elements are defined in the same method or block
@@ -512,7 +512,7 @@ aspect TypeResolution {
     }
 
 
-    syn lazy MethodImpl ClassDecl.lookupMethod(String name) {
+    syn MethodImpl ClassDecl.lookupMethod(String name) {
         for (MethodImpl m : getMethods()) {
             if (m.getMethodSig().getName().equals(name))
                 return m;
@@ -520,7 +520,7 @@ aspect TypeResolution {
         return null;
     }
 
-    syn lazy MethodSig InterfaceDecl.lookupMethod(String name) {
+    syn MethodSig InterfaceDecl.lookupMethod(String name) {
         for (MethodSig d : getBodys()) {
             if (d.getName().equals(name))
                 return d;

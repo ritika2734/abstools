@@ -1,3 +1,7 @@
+/*
+ * This aspect adds the field addedBy to the Decl to identify the modifier that added this Decl
+ * 
+ * */
 aspect AddedBy{
 	private String Decl.addedBy;
 	//private String DataTypeDecl.addedBy;

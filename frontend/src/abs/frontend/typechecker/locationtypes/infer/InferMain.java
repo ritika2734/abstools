@@ -121,7 +121,7 @@ public class InferMain extends Main {
 
     private void compile(String[] args) throws Exception {
         locationTypeInferenceEnabled = true;
-        final Model model = parse(args);
+        final Model model = parse(args).get(0);
         if (model.hasParserErrors() || model.hasErrors() || model.hasTypeErrors())
             return;
 

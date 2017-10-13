@@ -72,7 +72,7 @@ public class ABSTestRunnerCompiler extends Main {
      * @throws Exception
      */
     public void compile(String[] args) throws Exception {
-        final Model model = parse(args);
+        final Model model = parse(args).get("0");
         if (model.hasParserErrors() || model.hasErrors() || model.hasTypeErrors())
             return;
 

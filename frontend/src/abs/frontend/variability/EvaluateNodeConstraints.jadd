@@ -616,7 +616,7 @@ aspect EvaluateNodeConstraints{
 			System.exit(1);
 		}
 	}*/
-	public void MethodImpl.evaluateNodeConstraints(ArrayList<String> productFeatureSet)
+	/*public void MethodImpl.evaluateNodeConstraints(ArrayList<String> productFeatureSet)
 	{
 		try{
 			LogOp tree= this.getNodeLogOpConstraint();
@@ -656,7 +656,7 @@ aspect EvaluateNodeConstraints{
 			System.err.println("Second Exception14 izzzzz::"+e.getMessage());
 			System.exit(1);
 		}
-	}
+	}*/
 
 	public void ASTNode.evaluateNodeConstraints(ArrayList<String> productFeatureSet)
 	{
@@ -665,31 +665,45 @@ aspect EvaluateNodeConstraints{
 			org.chocosolver.solver.Model chocoModel=this.getChocoModelField();
 			if(chocoModel!=null){
 				if(tree!=null){
+					chocoModel.addClauses(tree);
+					
+					ArrayList<org.chocosolver.solver.constraints.Constraint> temp = new ArrayList<>(); 
 					for(BoolVarImpl var: this.getChocoVariablesList()){
+						chocoModel.getEnvironment().worldPush(); // to be able to restore initial state 
 						if(productFeatureSet.contains(var.getName())){
-							chocoModel.arithm(var,"=",1).post();
+							//chocoModel.arithm(var,"=",1).post();
+							org.chocosolver.solver.constraints.Constraint c1 = chocoModel.arithm(var, "=", 1);                   
+			                temp.add(c1);                                                        
+			                c1.post(); 
 						}else{
-							chocoModel.arithm(var,"=",0).post();
+							//chocoModel.arithm(var,"=",0).post();
+							org.chocosolver.solver.constraints.Constraint c0 = chocoModel.arithm(var, "=", 0);                   
+			                temp.add(c0);                                                        
+			                c0.post(); 
 						}
 					}
-					chocoModel.addClauses(tree);
-
+					Solver solver = chocoModel.getSolver();                                               
+				    solver.hardReset();                                                              
+				    if(solver.solve()){                                                              
+				        setBooleanValue(true);
+				    } else {                                                                         
+				        setBooleanValue(false);
+				    }                                                                                
+				    // restore initial state                                                         
+				    chocoModel.getEnvironment().worldPopUntil(0);                                         
+				    // remove all constraints relative to user's request                             
+				    for(org.chocosolver.solver.constraints.Constraint c:temp){
+				    	chocoModel.unpost(c);
+				    }
+				    temp.clear();            
+				
 				}else{
-					chocoModel.trueConstraint();	
-				}
-
-
-				Solver solver= chocoModel.getSolver();
-				Solution s= solver.findSolution();
-				if(this instanceof MethodImpl){
-					System.out.println("Solution is"+s);
-				}
-				if(s!=null){
 					setBooleanValue(true);
-				}else{
-					setBooleanValue(false);
+					//chocoModel.trueConstraint();	
 				}
-				//solver.reset();
+
+
+				
 
 			}else{
 				this.setBooleanValue(true);	

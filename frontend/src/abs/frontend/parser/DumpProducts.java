@@ -8,7 +8,9 @@
 package abs.frontend.parser;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.Map;
 
 import javax.xml.parsers.ParserConfigurationException;
 
@@ -20,19 +22,23 @@ import abs.frontend.delta.DeltaModellingException;
 public class DumpProducts extends Main {
 
     @Override
-    public Model parse(final String[] args) throws DeltaModellingException, IOException, WrongProgramArgumentException, ParserConfigurationException {
-        Model m = super.parse(args);
-        if (m.hasParserErrors()) {
-            // Main.parse() already printed a list of parse errors in this case.
-            throw new ParseException("Can't parse input.");
+    public ArrayList<Model> parse(final String[] args) throws DeltaModellingException, IOException, WrongProgramArgumentException, ParserConfigurationException {
+        ArrayList<Model> modelList = super.parse(args);
+
+        for(Model m: modelList){
+            if (m.hasParserErrors()) {
+                // Main.parse() already printed a list of parse errors in this case.
+                throw new ParseException("Can't parse input.");
+            }
+            Iterator<ProductDecl> pi = m.getProductDecls().iterator();
+            while (pi.hasNext()) {
+                System.out.print(pi.next().getName());
+                if (pi.hasNext())
+                    System.out.print(' ');
+            }
+
         }
-        Iterator<ProductDecl> pi = m.getProductDecls().iterator();
-        while (pi.hasNext()) {
-            System.out.print(pi.next().getName());
-            if (pi.hasNext())
-                System.out.print(' ');
-        }
-        return m;
+        return modelList;
     }
 
     public static void main(final String... args)  {
