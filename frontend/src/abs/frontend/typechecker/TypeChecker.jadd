@@ -1027,11 +1027,7 @@ aspect TypeChecker {
     }
 
     public void Exp.assertHasType(SemanticConditionList l, Type t) {
-        System.out.println("Exp.assertHasType "+getType());
         if (!getType().isAssignableTo(t)) {
-            System.out.println("Error with "+this);
-            System.out.println("t is::"+t);
-            System.out.println("getType() ::"+getType());
             l.add(new TypeError(this, ErrorMessage.EXPECTED_TYPE, t, getType()));
         }
     }
